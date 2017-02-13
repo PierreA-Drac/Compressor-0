@@ -2,7 +2,7 @@
 tags
 
 # Fichiers binaires
-exe/
+compressor-0
 *.o
 .fuse*
 
@@ -14,6 +14,3 @@ exe/
 # Documentation
 html/
 latex/
-
-# Pour ne pas ignorer certains répertoire
-!.gitkeep
