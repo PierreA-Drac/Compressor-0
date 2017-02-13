@@ -1,0 +1,19 @@
+# Fichier de configuration CTAGS
+tags
+
+# Fichiers binaires
+exe/
+*.o
+.fuse*
+
+# Fichiers temporaires, de sauvegardes
+*.d
+*.swp
+*~
+
+# Documentation
+html/
+latex/
+
+# Pour ne pas ignorer certains répertoire
+!.gitkeep
