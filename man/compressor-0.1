@@ -1,0 +1,64 @@
+.TH COMPRESSOR-0 1 "2017-02-03" UVSQ "Compressor project for UVSQ"
+
+.SH NAME
+compressor-0 \- compresser ou décompresser un fichier
+
+.SH SYNOPSIS
+\fBcompressor-0 -c\fR|\fB-d -i \fIINPUT FILE 
+\fR[\fB-o \fIOUTPUT FILE\fR] [\fIALGORITHM FLAG\fR] [\fB-s\fR]
+.RS
+      [\fB-h\fR]
+
+.SH DESCRIPTION
+\fBCompressor-0\fR permet de compresser et décompresser des fichiers.
+Ce programme ne traite pas l'archivage, il n'opère donc que sur un seul
+fichier à la fois. Pour la compression, il suffit de spécifier
+l'algorithme cible à utiliser par un flag. Pour la décompression, il
+n'est pas nécessaire de préciser l'algorithme.
+
+.SH OPTIONS
+
+.TP
+\fB-h\fR, \fB--help
+Affiche l'aide sur la sortie standard.
+
+.TP
+\fB-c\fR, \fB--compress
+Mode de compression du fichier entrant. Implique de préciser un algorthime.
+
+.TP
+\fB-d\fR, \fB--decompress
+Mode de décompression du fichier entrant. 
+
+.TP
+\fB-s\fR, \fB--statistics
+Affiche les statistiques de la compression ou de la décompression
+effectuée sur la sortie standard.
+
+.TP
+\fB-i \fIINPUT FILE\fR, \fB--input=\fIINPUT FILE
+Chemin vers le fichier entrant à traiter.
+
+.TP
+\fB-o \fIOUTPUT FILE\fR, \fB--output=\fIOUTPUT FILE
+Chemin vers le fichier sortant résultant. Si non spécifié, le fichier
+sortant gardera le nom du fichier source et sera écrit dans le répertoire
+"out/" situé dans le répertoire de l'exécutable.
+
+.SS ALGORITHMS FLAG
+
+.TP
+\fB--LZMA
+Compresse le fichier en utilisant l'algorithme LZMA. (Ici à titre
+d'exemple, algorithme non implémenté).
+
+.SH EXIT STATUS
+Retourne la valeur 0 si la compression s'est bien effectuée.
+
+.SH EXAMPLES
+
+\fBcompressor -c -i \fIenv/corpus/text.txt \fB-o \fItext.cmp
+\fB--LZMA -s
+
+\fBcompressor --decompress --input=\fI"text.cmp"
+\fB--output=\fI"text.txt"
