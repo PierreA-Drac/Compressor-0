@@ -37,17 +37,17 @@ void print_help(FILE * const stream, const int exit_code)
             "[ALGORITHM FLAG] [-s] [-h]\n\n"
             "Options :\n"
             "\t-h, --help\n"
-            "\t\tAffiche l'aide sur la sortie standard.\n"
+            "\t\tAffiche l'aide sur la sortie standard.\n\n"
             "\t-c, --compress\n"
-            "\t\tMode de compression du fichier entrant.\n"
+            "\t\tMode de compression du fichier entrant.\n\n"
             "\t-d, --decompress\n"
             "\t\tMode de décompression du fichier entrant. Implique de préciser"
-            " un algorthime.\n"
+            " un algorthime.\n\n"
             "\t-s, --statistics\n"
             "\t\tAffiche les statistiques de la compression ou de la "
-            "décompression effectuée sur la sortie standard.\n"
+            "décompression effectuée sur la sortie standard.\n\n"
             "\t-i INPUT FILE, --input=INPUT FILE\n"
-            "\t\tChemin vers le fichier entrant à traiter.\n"
+            "\t\tChemin vers le fichier entrant à traiter.\n\n"
             "\t-o OUTPUT FILE, --output=OUTPUT FILE\n"
             "\t\tChemin vers le fichier sortant résultant. Si non spécifié, le "
             "fichier sortant gardera le nom du fichier source et sera écrit\n "
@@ -58,8 +58,8 @@ void print_help(FILE * const stream, const int exit_code)
             "\t\tCompresse le fichier en utilisant l'algorithme LZMA. (Ici à "
             "titre d'exemple, algorithme non implémenté).\n\n"
             "Exemples :\n"
-            "\tcompressor -c -i env/corpus/text.txt -o text.cmp --LZMA -s\n"
+            "\tcompressor -c -i env/corpus/text.txt -o text.cmp --LZMA -s\n\n"
             "\tcompressor --decompress --input=\"text.cmp\""
-            "--output=\"text.txt\"\n");
+            "--output=\"text.txt\"\n\n");
     exit(exit_code);
 }
