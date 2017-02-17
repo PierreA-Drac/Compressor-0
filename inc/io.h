@@ -20,8 +20,8 @@ typedef struct compress_file compress_file_s;
 
 /** Correspond à un fichier en cours de traitement. */
 struct compress_file {
-    FILE *fd_in;                /*!< Fichier entrant. */
-    FILE *fd_out;               /*!< Fichier sortant. */
+    FILE *fp_in;                /*!< Fichier entrant. */
+    FILE *fp_out;               /*!< Fichier sortant. */
     uint64_t *p_stream;         /*!< Flux contenant les données à compresser. */
 };
 

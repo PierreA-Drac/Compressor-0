@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
                                      prog_info.s_output_file))
         p_error(ERR_PRINT_STAT);
     /* Libération de la mémoire. */
-    fclose(cmp_f.fd_in);
-    fclose(cmp_f.fd_out);
+    fclose(cmp_f.fp_in);
+    fclose(cmp_f.fp_out);
     return 0;
 }

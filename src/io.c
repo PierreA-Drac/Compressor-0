@@ -67,8 +67,8 @@ compress_file_s init_cmp_file(const char *s_filepath_in,
 {
     compress_file_s cf;
     cf.p_stream = NULL;
-    if (!(cf.fd_in = fopen(s_filepath_in, "rb")) ||
-        !(cf.fd_out = fopen(s_filepath_out, "wb"))) {
+    if (!(cf.fp_in = fopen(s_filepath_in, "rb")) ||
+        !(cf.fp_out = fopen(s_filepath_out, "wb"))) {
         perror("fopen in init_cmp_file");
         exit(EXIT_FAILURE);
     }
