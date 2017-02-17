@@ -1,6 +1,6 @@
-# Variables ...................................................................:
+# Variables ====================================================================
 
-## Structure du projet ........................................................:
+## Dépendances ................................................................:
 
 DEPS = Doxyfile
 # Si on appelle ce Makefile depuis le Makefile maître :
@@ -13,7 +13,7 @@ endif
 PDF_VIEWER = evince
 INTERNET_BROWSER = firefox
 
-# Cibles ......................................................................:
+# Cibles =======================================================================
 
 .PHONY : clean
 
@@ -33,7 +33,8 @@ $(DOC_PATH)html/index.html : $(DEPS)
 	doxygen Doxyfile
 	
 $(DOC_PATH)latex/refman.pdf : $(DEPS)
-	@echo "--> Compilation de la documentation en PDF de $(PROJECT) dans './latex/' :"
+	@echo "--> Compilation de la documentation en PDF de $(PROJECT)" \
+	    "dans './latex/' :"
 	make --directory="$(DOC_PATH)latex/" --no-print-directory
 
 ## Nettoyage ..................................................................:

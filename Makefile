@@ -1,8 +1,9 @@
-# Variables ...................................................................:
+# Variables ====================================================================
 
 ## Structure du projet ........................................................:
 
 export PROJECT = Compressor-0
+EXE_NAME = compressor-0
 
 export WD_PATH = $(shell pwd)/
 export SRC_PATH = src/
@@ -35,12 +36,11 @@ else
     CFLAGS += -O2 -DNDEBUG
 endif
 
-
 ## Lancement ..................................................................:
 
 ARGS = 
 
-# Cibles ......................................................................:
+# Cibles =======================================================================
 
 .PHONY : clean mrproper indent doc man
 
@@ -75,16 +75,16 @@ $(OBJ_PATH)%.o : $(SRC_PATH)%.c
 
 clean :
 	@echo "--> Suppression des fichier temporaires de $(PROJECT) :"
-	rm -f $(OBJ_PATH)*.o $(OBJ_PATH)*.d $(SRC_PATH)*~ $(INC_PATH)*~ \
-	    $(OUT_PATH)* .fuse_hidden*
-	    
+	rm -f $(OBJ_PATH)*.o $(OBJ_PATH)*.d $(SRC_PATH)*~ $(INC_PATH)*~
 
 mrproper : clean
-	@echo "--> Suppression de l'exécutable de $(PROJECT) :"
-	rm -f $(EXEC)
+	@echo "--> Suppression de l'exécutable et des fichiers produits" \
+	    "de $(PROJECT) :"
+	rm -f $(EXEC) $(OUT_PATH)*
 	make clean --directory="$(BENCH_PATH)" --no-print-directory
 	make clean --directory="$(DOC_PATH)" --no-print-directory
-	@echo "--> Nettoyage complet du dossier de travail de $(PROJECT) effectué !"
+	@echo "--> Nettoyage complet du dossier de travail de $(PROJECT)" \
+	    "effectué !"
 
 ## Debugger ...................................................................:
 
@@ -106,7 +106,8 @@ valgrind-p2 : compil
 ## Présentation ...............................................................:
 
 indent :
-	@echo "--> Reformatage de la présentation du code (paramètres dans .indent.pro) :"
+	@echo "--> Reformatage de la présentation du code (paramètres dans" \
+	    ".indent.pro) :"
 	indent $(SRC_PATH)* $(INC_PATH)*
 
 ## Documentation ..............................................................:
