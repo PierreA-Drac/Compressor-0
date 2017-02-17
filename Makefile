@@ -12,7 +12,7 @@ DOC_PATH = doc/
 MAN_PATH = man/
 EXE_PATH = exe/
 OUT_PATH = $(EXE_PATH)out/
-EXE_NAME = compressor-0
+BENCH_PATH = bench/
 
 EXEC = $(EXE_PATH)$(EXE_NAME)
 export SRC = $(shell find $(SRC_PATH)*.c)
@@ -50,6 +50,11 @@ run : compil
 	@echo "--> Lancement de '$(EXEC)' :"
 	$(EXEC) $(ARGS)
 
+## Benchmark ..................................................................:
+
+benchmark :
+	make --directory="$(BENCH_PATH)" --no-print-directory
+
 ## Compilation ................................................................:
 
 compil : $(EXEC)
@@ -77,6 +82,7 @@ clean :
 mrproper : clean
 	@echo "--> Suppression de l'exécutable de $(PROJECT) :"
 	rm -f $(EXEC)
+	make clean --directory="$(BENCH_PATH)" --no-print-directory
 	make clean --directory="$(DOC_PATH)" --no-print-directory
 	@echo "--> Nettoyage complet du dossier de travail de $(PROJECT) effectué !"
 
