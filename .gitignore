@@ -10,6 +10,9 @@ compressor-0
 *.d
 *.swp
 *~
+*.log
+*.svg
+out/
 
 # Documentation
 html/
