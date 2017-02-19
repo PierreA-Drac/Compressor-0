@@ -81,10 +81,10 @@ Retourne la valeur 0 si la compression s'est bien effectuée.
 
 ### Exemples
 
-> $ <b>compressor -c -i</b> <i>env/corpus/text.txt</i> <b>-o</b> <i>text.cmp</i>
+> $ <b>compressor-0 -c -i</b> <i>env/corpus/text.txt</i> <b>-o</b> <i>text.cmp</i>
 > <b>\-\-LZMA -s</b>
 
-> $ <b>compressor \-\-decompress \-\-input=</b><i>"text.cmp"</i>
+> $ <b>compressor-0 \-\-decompress \-\-input=</b><i>"text.cmp"</i>
 > <b>\-\-output=</b><i>"text.txt"</i>
 
 ## Make instructions
@@ -116,11 +116,11 @@ Nettoie les fichiers temporaires et de sauvegarde du dossier de travail.
 Effectue le nettoyage d'un "clean" ainsi que l'exécutable, les fichiers
 produits par lui-même, les benchmarks et la documentation.
 
-> $ <b>make gdb</b> [<b>ARGS=</b><i>OPTIONS</i>] <br/>
+> $ <b>make gdb</b> [<b>ARGS=</b><i>ARGUMENTS</i>] <br/>
 
-Lance gdb pour débugguer avec les arguments de la variables ARGS.
+Lance gdb pour débugguer avec les arguments de la variable ARGS.
 
-> $ <b>make valgrind-p</b>[<b>1</b>|<b>2</b>] [<b>ARGS=</b><i>OPTIONS</i>] <br/>
+> $ <b>make valgrind-p</b>[<b>1</b>|<b>2</b>] [<b>ARGS=</b><i>ARGUMENTS</i>] <br/>
 
 Lance valgrind avec les arguments de la variables ARGS avec le profil p1 (plus
 rapide mais moins précis) ou le profil p2 (plus lent mais plus précis).
