@@ -10,9 +10,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "errors.h"
 #include "init.h"
 #include "io.h"
-#include "errors.h"
+#include "stats.h"
 
 /* Point d'entrée =========================================================== */
 
