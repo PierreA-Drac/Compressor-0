@@ -138,3 +138,7 @@ précédemment).
 > $ <b>make man</b> <br/>
 
 Affiche le manuel du programme.
+
+> $ <b>make help</b> <br/>
+
+Affiche l'aide du Makefile.
