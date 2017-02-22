@@ -9,8 +9,12 @@ if (!exists("file_out")) {
 }
 
 # Résolution du graphique de sortie.
-res_w = 1920    # Width.
-res_h = 1080    # Height.
+adaptative_res = 1      # Résolution adaptive en fonction du nombre
+                        # d'histogramme à afficher : 1 activé, 0 désactivé.
+res_w_by_histo = 500    # Width par nombre d'histogramme (si activé).
+res_w_min = 1280        # Width minimum (si activé).
+res_h = 1080            # Height.
+res_w = 1920            # Width.
 
 # Colonnes.
 col_file = 1        # Nom du fichier.
@@ -27,14 +31,30 @@ x_by_y(x, y) = x*100/y
 
 # Script =======================================================================
 
+# Paramètres du fichier de données.
+set datafile separator '|'
+
+# Récupération des statistiques pour les calculs : temps de compression,
+# espace mémoire utilisé maximum, et nombre de lignes pour le calcul de la
+# résolution.
+stats file_in using col_cmp_time:col_mem_space nooutput
+cmp_time_max = STATS_max_x
+mem_space_max = STATS_max_y
+nb_histo = STATS_records
+# Un warning sera affiché si on a seulement une ou deux lignes dans le fichier
+# de données, c'est normal.
+
+# Redéfinition de res_w en fonction du nombre d'histogramme à produire.
+if (adaptative_res == 1) {
+    res_w = nb_histo*res_w_by_histo
+    res_w = res_w >= res_w_min ? res_w : res_w_min
+}
+
 # Sortie du graphique.
 #set terminal x11 size res_w,res_h
 set terminal svg size res_w,res_h
 set output file_out
 set encoding utf8
-
-# Fichier de données.
-set datafile separator '|'
 
 # Style du graphique.
 set style data histogram 
@@ -50,14 +70,6 @@ set title 'Statistiques de compression'
 set ylabel 'Pourcentage (plus faible est mieux)'
 set key on outside horizontal center bottom spacing 5 autotitle columnhead
 set xtics rotate by -45
-
-# Récupération des statistiques pour les calculs : temps de compression et
-# espace mémoire utilisé maximum.
-stats file_in using col_cmp_time:col_mem_space nooutput
-cmp_time_max = STATS_max_x
-mem_space_max = STATS_max_y
-# Un warning sera affiché si on a seulement une ou deux lignes dans le fichier
-# de données, c'est normal.
 
 # Échelle.
 unset autoscale y
