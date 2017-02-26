@@ -159,7 +159,7 @@ int cmpf_close(cmp_file_s * cf)
     if (!cf)
         return p_error(ERR_BAD_ADRESS);
     /* Vide le buffer avant la fermeture des flux. */
-    if (cmpf_write_file(cf))
+    if (cf->p_write && cmpf_write_file(cf))
         return p_error(ERR_FWRITE);
     /* Ferme les fichiers. */
     fclose(cf->fp_in);
