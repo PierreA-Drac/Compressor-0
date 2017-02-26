@@ -15,21 +15,32 @@
 
 typedef enum err_code err_code_e;
 
-/** Liste les codes d'erreurs du programme. */
+/** Liste des codes d'erreurs du programme. Utilisé dans le retour des
+ * fonctions et dans la correspondance erreur <=> message. Le code 0 signifie
+ * (sauf cas particulier) qu'aucune erreur ne s'est produite. */
 enum err_code {
-    ERR_MISSING_OPTIONS,        /*!< Options nécéssaires au programme manquantes. */
-    ERR_PRINT_STAT              /*!< Erreur pendant la récupération des
+    ERR_NONE = 0,               /*!< Aucune erreur. */
+    ERR_BAD_ADRESS,             /*!< Pointeur null ou invalide. */
+    ERR_MISSING_OPTIONS,        /*!< Options nécéssaires au programme
+                                   manquantes. */
+    ERR_PRINT_STAT,             /*!< Erreur pendant la récupération des
                                    statistiques. */
+    ERR_FREAD,                  /*!< Erreur pendant la lecture du fichier. */
+    ERR_FREAD_EOF,              /*!< Erreur pendant la lecture du fichier car la
+                                   fin à déjà été atteinte. */
+    ERR_FWRITE,                 /*!< Erreur pendant l'écriture du fichier. */
+    ERR_FCLOSE                  /*!< Erreur pendant la fermeture du fichier. */
 };
 
 /* Fonctions publiques ====================================================== */
 
 /**
  * Affiche le message d'erreur sur la sortie d'erreur en fonction du code
- * d'erreur spécifié.
- * \param err_code Code d'erreur.
+ * d'erreur spécifié et renvoie ce même code d'erreur.
+ * \param err Code d'erreur.
+ * \return Code d'erreur entré.
  */
-void p_error(err_code_e const err);
+err_code_e p_error(const err_code_e err);
 
 /**
  * Affiche l'aide sur le flux spécifié et quitte le programme avec le code
