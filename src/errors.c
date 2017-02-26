@@ -14,10 +14,15 @@
 
 /* Fonctions publiques ====================================================== */
 
-void p_error(err_code_e const err)
+err_code_e p_error(const err_code_e err)
 {
     fprintf(stderr, "Erreur : ");
     switch (err) {
+        case ERR_NONE:
+            break;
+        case ERR_BAD_ADRESS:
+            fprintf(stderr, "L'adresse spécifiée est invalide (ou nulle).\n");
+            break;
         case ERR_MISSING_OPTIONS:
             fprintf(stderr, "Une option requise est manquante pour le "
                     "fonctionnement du programme.\n");
@@ -25,7 +30,21 @@ void p_error(err_code_e const err)
         case ERR_PRINT_STAT:
             fprintf(stderr, "Récupération des statistiques impossible.\n");
             break;
+        case ERR_FREAD:
+            fprintf(stderr, "Lecture du fichier impossible.\n");
+            break;
+        case ERR_FREAD_EOF:
+            fprintf(stderr, "Lecture du fichier impossible car la fin à été"
+                    "atteinte.\n");
+            break;
+        case ERR_FWRITE:
+            fprintf(stderr, "Écriture du fichier impossible.\n");
+            break;
+        case ERR_FCLOSE:
+            fprintf(stderr, "Fermeture du fichier impossible.\n");
+            break;
     }
+    return err;
 }
 
 void print_help(FILE * const stream, const int exit_code)

@@ -9,20 +9,22 @@ actuellement en *cours de développement*.
 
 Le but de ce projet est de développer un logiciel en ligne commande qui permet
 de compresser et de décompresser des fichiers. Les fichiers peuvent être de type
-variés, mais nous traiterons dans un premier temps les fichiers textes. Ce
+différents, mais nous traiterons dans un premier temps les fichiers textes. Ce
 programme doit permettre l'utilisation de plusieurs algorithmes différents avec
 différentes implémentations variées, l'objectif étant de trouver le meilleur
 compromis entre le temps de compression et la taille de l'objet compressé.
-Pour cela, un environnement complet et propre doit être mis en place, ainsi qu'un
-système de benchmark, avant de développer les implémentations d'algorithmes.
 
 ## Fonctionnalités à implémenter
 
-* Fonctions d'entrées/sorties génériques avec structure adaptée à la
-compression.
+* Fonctions d'entrées/sorties génériques (en cours).
+* Fonctions de modification et lecture bit à bit.
 * Implémentation d'arbre binaire.
+* Implémentation de tas binaire.
 * Implémentations de plusieurs algorithmes :
+    * Codage par répetition.
     * À déterminer.
+* Histogrammes : plusieurs modes différents (ex. : regrouper chacune des données
+par algo).
 
 ## Description
 

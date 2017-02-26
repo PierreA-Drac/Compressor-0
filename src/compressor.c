@@ -19,27 +19,26 @@
 
 int main(int argc, char *argv[])
 {
-    /* Initialisation du programme. */
+    /* Initialisation du programme (si une fonction échoue, le programme est
+     * terminé automatiquement par ces fonctions). */
 
     /* Récupérations des paramètres. */
-    const prog_info_s prog_info = init_prog(argc, argv);
+    const prog_info_s pi = init_prog(argc, argv);
     /* Initialisation de la génération des statistiques. */
-    if (prog_info.stat)
+    if (pi.stat)
         init_stat();
     /* Ouverture des flux. */
-    compress_file_s cmp_f = init_cmp_file(prog_info.s_input_file,
-                                          prog_info.s_output_file);
+    cmp_file_s cmp_f = cmpf_open(pi.s_input_file, pi.s_output_file);
 
     /* Partie compression. */
 
     /* Fin du programme. */
 
+    /* Fermeture des flux. */
+    if (cmpf_close(&cmp_f))
+        return p_error(ERR_FCLOSE);
     /* Génération des statistiques si demandé. */
-    if (prog_info.stat && print_stat(prog_info.s_input_file,
-                                     prog_info.s_output_file))
+    if (pi.stat && print_stat(pi.s_input_file, pi.s_output_file))
         p_error(ERR_PRINT_STAT);
-    /* Libération de la mémoire. */
-    fclose(cmp_f.fp_in);
-    fclose(cmp_f.fp_out);
     return 0;
 }
