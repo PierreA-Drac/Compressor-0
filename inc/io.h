@@ -14,43 +14,85 @@
 #include <stdio.h>
 #include <stdint.h>
 
+/* Macro-constantes publiques =============================================== */
+
+/** Taille d'un tableau contenant un fichier chargé en mémoire. */
+#define BUFFER_SIZE 2048
+
+/** Taille d'un bloc en byte. */
+#define BLOCK_SIZE sizeof(block_t)
+/** Longueur d'un bloc en bit. */
+#define BLOCK_LENGHT BLOCK_SIZE*CHAR_BIT
+
+/* Types publiques ========================================================== */
+
+typedef uint64_t block_t;
+
 /* Structures publiques ===================================================== */
 
-typedef struct compress_file compress_file_s;
+typedef struct cmp_file cmp_file_s;
 
 /** Correspond à un fichier en cours de traitement. */
-struct compress_file {
+struct cmp_file {
     FILE *fp_in;                /*!< Fichier entrant. */
     FILE *fp_out;               /*!< Fichier sortant. */
-    uint64_t *p_stream;         /*!< Flux contenant les données à compresser. */
+    int nb_blocks;              /*!< Nombre de bloc chargé dans "a_read_stream". */
+    int nb_bytes;               /*!< Nombre de byte chargé dans "a_read_stream". */
+    block_t a_read_stream[BUFFER_SIZE]; /*!< Flux contenant les données à lire. */
+    block_t a_write_stream[BUFFER_SIZE];        /*!< Flux contenant les données à
+                                                   écrire. */
+    block_t *p_read;            /*!< Pointeur sur le prochain bloc à lire. */
+    block_t *p_write;           /*!< Pointeur sur le prochain bloc à écrire. */
 };
 
 /* Fonctions publiques ====================================================== */
 
 /**
- * Initialise les flux vers les fichiers entrant et sortant, et assure les
- * routines de détection d'erreurs. Quitte le programme avec EXIT_FAILURE si une
- * erreur survient.
+ * Initialise les flux vers les fichiers entrant et sortant, initialise la
+ * structure pour qu'elle soit prête à être utilisée et assure les routines de
+ * détection d'erreurs. Quitte le programme avec EXIT_FAILURE si une erreur
+ * survient.
  * \param filepath_in Chemin vers le fichier entrant.
  * \param filepath_out Chemin vers le fichier sortant.
- * \return compressed_file_s Structure contenant les flux des fichiers.
+ * \return Structure d'un fichier prêt à être traité.
  */
-compress_file_s init_cmp_file(const char *s_filepath_in,
-                              const char *s_filepath_out);
+cmp_file_s cmpf_open(const char *s_filepath_in, const char *s_filepath_out);
 
 /**
- * Initialise les variables nécéssaire à la génération des statistiques du
- * programme.
+ * Lit un bloc de donnée du fichier entrant pointé par cf depuis son buffer, et
+ * le stocke dans le bloc pointé par b.
+ * \param cf Fichier traité.
+ * \param b Bloc à remplir.
+ * \return 0 sur un succès, ERR_BAD_ADRESS si un pointeur est incorrect (affiche
+ * un message), ERR_FREAD si une erreur survient lors de la lecture (affiche un
+ * message), et ERR_FREAD_EOF si on à déjà lu la fin du fichier.
  */
-void init_stat();
+int cmpf_get_block(cmp_file_s * cf, block_t * b);
 
 /**
- * Affiche les statistiques sur le programme et les fichiers traités sur la
- * sortie standard. La fonction init_stat doit être appellée avant print_stat.
- * \param filepath_in Chemin vers le fichier entrant.
- * \param filepath_out Chemin vers le fichier sortant.
- * \return Si succès 0 est retourné, si erreur -1 est retourné.
+ * Écris le bloc de donnée pointé par b sur le buffer du fichier sortant pointé
+ * par cf.
+ * \param cf Fichier traité.
+ * \param b Bloc à écrire.
+ * \return 0 sur un suucès, ERR_BAD_ADRESS si un pointeur est incorrect (affiche
+ * un message), ou ERR_FWRITE si une erreur survient lors de l'écriture (affiche un
+ * message).
  */
-int print_stat(const char *s_filepath_in, const char *s_filepath_out);
+int cmpf_put_block(cmp_file_s * cf, block_t b);
+
+/**
+ * Vide le buffer d'écriture sur le disque, ferme les flux vers les fichiers
+ * entrant et sortant, et réinitialise la structure comme lors de la création.
+ * \param cf Fichier à fermer.
+ * \return 0 sur un succès, ERR_BAD_ADRESS si un pointeur est incorrect (affiche
+ * un message), ou ERR_FWRITE si un problème survient lors du flush du buffer
+ * d'écriture (affiche un message).
+ */
+int cmpf_close(cmp_file_s * cf);
+
+/**
+ * Rembobine le fichier d'entrée de cf au début.
+ */
+void cmpf_rewind(cmp_file_s * cf);
 
 #endif
