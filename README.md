@@ -127,6 +127,12 @@ Lance gdb pour débugguer avec les arguments de la variable ARGS.
 Lance valgrind avec les arguments de la variables ARGS avec le profil p1 (plus
 rapide mais moins précis) ou le profil p2 (plus lent mais plus précis).
 
+> $ <b> make gprof</b> [<b>ARGS=</b><i>ARGUMENTS</i>]
+>
+Nettoie les fichiers temporaires et relance la compilation avec les flags
+nécessaires à gprof, puis affiche le résultat du profilage sur la sortie
+standard.
+
 > $ <b>make indent</b> <br/>
 
 Lance le progamme indent sur les fichiers sources et headers avec les paramètres

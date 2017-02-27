@@ -23,13 +23,14 @@ OBJ = $(SRC:$(SRC_PATH)%.c=$(OBJ_PATH)%.o)
 ## Compilation ................................................................:
 
 DEBUG = 1
-INC_FLAGS = -I$(INC_PATH)
-DEP_FLAGS = -MMD -MP
 
 CC = gcc
-LDFLAGS =
+INC_FLAGS = -I$(INC_PATH)
+DEP_FLAGS = -MMD -MP
+PROF_FLAGS = -pg
 
 CFLAGS = $(INC_FLAGS) $(DEP_FLAGS)
+LDFLAGS =
 ifeq ($(DEBUG), 1)
     CFLAGS += -Og -g3 -Wall
 else
@@ -75,7 +76,7 @@ $(OBJ_PATH)%.o : $(SRC_PATH)%.c
 
 clean :
 	@echo "--> Suppression des fichier temporaires de $(PROJECT) :"
-	rm -f $(OBJ_PATH)*.o $(OBJ_PATH)*.d $(SRC_PATH)*~ $(INC_PATH)*~
+	rm -f $(OBJ_PATH)*.o $(OBJ_PATH)*.d $(SRC_PATH)*~ $(INC_PATH)*~ gmon.out
 
 mrproper : clean
 	@echo "--> Suppression de l'exécutable et des fichiers produits" \
@@ -86,7 +87,7 @@ mrproper : clean
 	@echo "--> Nettoyage complet du dossier de travail de $(PROJECT)" \
 	    "effectué !"
 
-## Debugger ...................................................................:
+## Debugger & Profiler ........................................................:
 
 gdb : compil
 	@echo "--> Debbugage avec $@ :"
@@ -102,6 +103,12 @@ valgrind-p2 : compil
 	valgrind --tool=memcheck --leak-check=full --leak-resolution=high \
 	    --show-possibly-lost=yes --show-reachable=yes --track-origins=yes \
 	    $(EXEC) $(ARGS)
+
+gprof :
+	make clean --no-print-directory
+	make run --no-print-directory CFLAGS="$(CFLAGS) $(PROF_FLAGS)" \
+	    LDFLAGS="$(LDFLAGS) $(PROF_FLAGS)"
+	gprof $(EXEC)
 
 ## Présentation ...............................................................:
 
@@ -152,6 +159,10 @@ help :
 	@echo "\t\tLance valgrind avec les arguments de la variables ARGS" 
 	@echo "\t\tavec le profil p1 (plus rapide mais moins précis) ou le"
 	@echo "\t\tprofil p2 (plus lent mais plus précis)."
+	@echo "\n\tmake gprof [ARGS=ARGUMENTS]"
+	@echo "\t\tNettoie les fichiers temporaires et relance la compilation"
+	@echo "\t\tavec les flags necéssaires à gprof, puis affiche le résultat"
+	@echo "\t\tdu profilage sur la sortie standard."
 	@echo "\n\tmake indent"
 	@echo "\t\tLance le progamme indent sur les fichiers sources et" 
 	@echo "\t\theaders avec les paramètres du fichier .indent.pro."
