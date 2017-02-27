@@ -6,13 +6,14 @@ compressor-0
 *.o
 .fuse*
 
-# Fichiers temporaires, de sauvegardes
+# Fichiers temporaires ou de sauvegardes
 *.d
 *.swp
 *~
 *.log
 *.svg
 out/
+gmon.out
 
 # Documentation
 html/
