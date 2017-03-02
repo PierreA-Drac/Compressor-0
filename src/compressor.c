@@ -26,19 +26,19 @@ int main(int argc, char *argv[])
     const prog_info_s pi = init_prog(argc, argv);
     /* Initialisation de la génération des statistiques. */
     if (pi.stat)
-        init_stat();
+        stat_init();
     /* Ouverture des flux. */
-    cmp_file_s cmp_f = cmpf_open(pi.s_input_file, pi.s_output_file);
+    cmp_file_s cf = cmpf_open(pi.s_input_file, pi.s_output_file);
 
     /* Partie compression. */
 
     /* Fin du programme. */
 
     /* Fermeture des flux. */
-    if (cmpf_close(&cmp_f))
-        return p_error(ERR_FCLOSE);
+    if (cmpf_close(&cf))
+        return err_print(ERR_IO_FCLOSE);
     /* Génération des statistiques si demandé. */
-    if (pi.stat && print_stat(pi.s_input_file, pi.s_output_file))
-        p_error(ERR_PRINT_STAT);
+    if (pi.stat && stat_print(pi.s_input_file, pi.s_output_file))
+        err_print(ERR_STAT_PRINT);
     return 0;
 }

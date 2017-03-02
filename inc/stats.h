@@ -1,5 +1,5 @@
 /**
- * \file stats.c
+ * \file stats.h
  * \author AYOUB Pierre
  * \date 20 février 2017
  *
@@ -17,15 +17,15 @@
  * Initialise les variables nécéssaire à la génération des statistiques du
  * programme.
  */
-void init_stat();
+void stat_init();
 
 /**
  * Affiche les statistiques sur le programme et les fichiers traités sur la
- * sortie standard. La fonction init_stat doit être appellée avant print_stat.
+ * sortie standard. La fonction stat_init doit être appellée avant stat_print.
  * \param filepath_in Chemin vers le fichier entrant.
  * \param filepath_out Chemin vers le fichier sortant.
  * \return Si succès 0 est retourné, si erreur -1 est retourné.
  */
-int print_stat(const char *s_filepath_in, const char *s_filepath_out);
+int stat_print(const char *s_filepath_in, const char *s_filepath_out);
 
 #endif

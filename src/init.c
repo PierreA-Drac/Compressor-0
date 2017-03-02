@@ -83,9 +83,9 @@ static prog_info_s get_args(prog_info_s P, const int argc, char *const *argv)
                 P.algo = ALGO_LZMA;
                 break;
             case 'h':
-                print_help(stdout, EXIT_SUCCESS);
+                help_print(stdout, EXIT_SUCCESS);
             case '?':          /* Option non reconnue. */
-                print_help(stdout, EXIT_FAILURE);
+                help_print(stdout, EXIT_FAILURE);
             case -1:           /* Lecture terminée. */
                 break;
             default:           /* Erreur dans la fonction. */
@@ -108,8 +108,8 @@ prog_info_s init_prog(const int argc, char *const *argv)
     /* Test que les options obligatoires ont bien étés passées. */
     if ((pinfo.mode == MODE_COMPRESS && !pinfo.algo) || !pinfo.mode ||
         !pinfo.s_input_file) {
-        p_error(ERR_MISSING_OPTIONS);
-        print_help(stderr, EXIT_FAILURE);
+        err_print(ERR_INIT_MISSING_OPTIONS);
+        help_print(stderr, EXIT_FAILURE);
     }
 
     /* Met un nom par défaut au fichier de sortie si non spécifié. */

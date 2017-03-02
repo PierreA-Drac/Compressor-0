@@ -14,7 +14,7 @@
 
 /* Fonctions publiques ====================================================== */
 
-err_code_e p_error(const err_code_e err)
+err_code_e err_print(const err_code_e err)
 {
     fprintf(stderr, "Erreur : ");
     switch (err) {
@@ -23,31 +23,31 @@ err_code_e p_error(const err_code_e err)
         case ERR_BAD_ADRESS:
             fprintf(stderr, "L'adresse spécifiée est invalide (ou nulle).\n");
             break;
-        case ERR_MISSING_OPTIONS:
+        case ERR_INIT_MISSING_OPTIONS:
             fprintf(stderr, "Une option requise est manquante pour le "
                     "fonctionnement du programme.\n");
             break;
-        case ERR_PRINT_STAT:
+        case ERR_STAT_PRINT:
             fprintf(stderr, "Récupération des statistiques impossible.\n");
             break;
-        case ERR_FREAD:
+        case ERR_IO_FREAD:
             fprintf(stderr, "Lecture du fichier impossible.\n");
             break;
-        case ERR_FREAD_EOF:
+        case ERR_IO_FREAD_EOF:
             fprintf(stderr, "Lecture du fichier impossible car la fin à été"
                     "atteinte.\n");
             break;
-        case ERR_FWRITE:
+        case ERR_IO_FWRITE:
             fprintf(stderr, "Écriture du fichier impossible.\n");
             break;
-        case ERR_FCLOSE:
+        case ERR_IO_FCLOSE:
             fprintf(stderr, "Fermeture du fichier impossible.\n");
             break;
     }
     return err;
 }
 
-void print_help(FILE * const stream, const int exit_code)
+void help_print(FILE * const stream, const int exit_code)
 {
     fprintf(stream,
             "Affichage de l'aide :\n\n"
@@ -60,22 +60,22 @@ void print_help(FILE * const stream, const int exit_code)
             "\t-c, --compress\n"
             "\t\tMode de compression du fichier entrant.\n\n"
             "\t-d, --decompress\n"
-            "\t\tMode de décompression du fichier entrant. Implique de préciser"
-            " un algorthime.\n\n"
+            "\t\tMode de décompression du fichier entrant.\n"
+            "\t\tImplique de préciser un algorthime.\n\n"
             "\t-s, --statistics\n"
-            "\t\tAffiche les statistiques de la compression ou de la "
-            "décompression effectuée sur la sortie standard.\n\n"
+            "\t\tAffiche les statistiques de la compression ou de la\n"
+            "\t\tdécompression effectuée sur la sortie standard.\n\n"
             "\t-i INPUT FILE, --input=INPUT FILE\n"
             "\t\tChemin vers le fichier entrant à traiter.\n\n"
             "\t-o OUTPUT FILE, --output=OUTPUT FILE\n"
-            "\t\tChemin vers le fichier sortant résultant. Si non spécifié, le "
-            "fichier sortant gardera le nom du fichier source et sera écrit\n "
-            "\t\tdans le répertoire \"out/\" situé dans le répertoire de "
-            "l'exécutable.\n\n"
+            "\t\tChemin vers le fichier sortant résultant. Si non spécifié,\n"
+            "\t\tle fichier sortant gardera le nom du fichier source et\n"
+            "\t\tsera écrit dans le répertoire \"out/\" situé dans le\n"
+            "\t\trépertoire de l'exécutable.\n\n"
             "Algorithmes :\n"
             "\t--LZMA\n"
-            "\t\tCompresse le fichier en utilisant l'algorithme LZMA. (Ici à "
-            "titre d'exemple, algorithme non implémenté).\n\n"
+            "\t\tCompresse le fichier en utilisant l'algorithme LZMA.\n"
+            "\t\t(Ici à titre d'exemple, algorithme non implémenté).\n\n"
             "Exemples :\n"
             "\tcompressor -c -i env/corpus/text.txt -o text.cmp --LZMA -s\n\n"
             "\tcompressor --decompress --input=\"text.cmp\""

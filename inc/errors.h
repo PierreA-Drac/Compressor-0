@@ -21,15 +21,15 @@ typedef enum err_code err_code_e;
 enum err_code {
     ERR_NONE = 0,               /*!< Aucune erreur. */
     ERR_BAD_ADRESS,             /*!< Pointeur null ou invalide. */
-    ERR_MISSING_OPTIONS,        /*!< Options nécéssaires au programme
+    ERR_INIT_MISSING_OPTIONS,        /*!< Options nécéssaires au programme
                                    manquantes. */
-    ERR_PRINT_STAT,             /*!< Erreur pendant la récupération des
+    ERR_STAT_PRINT,             /*!< Erreur pendant la récupération des
                                    statistiques. */
-    ERR_FREAD,                  /*!< Erreur pendant la lecture du fichier. */
-    ERR_FREAD_EOF,              /*!< Erreur pendant la lecture du fichier car la
+    ERR_IO_FREAD,                  /*!< Erreur pendant la lecture du fichier. */
+    ERR_IO_FREAD_EOF,              /*!< Erreur pendant la lecture du fichier car la
                                    fin à déjà été atteinte. */
-    ERR_FWRITE,                 /*!< Erreur pendant l'écriture du fichier. */
-    ERR_FCLOSE                  /*!< Erreur pendant la fermeture du fichier. */
+    ERR_IO_FWRITE,                 /*!< Erreur pendant l'écriture du fichier. */
+    ERR_IO_FCLOSE                  /*!< Erreur pendant la fermeture du fichier. */
 };
 
 /* Fonctions publiques ====================================================== */
@@ -40,7 +40,7 @@ enum err_code {
  * \param err Code d'erreur.
  * \return Code d'erreur entré.
  */
-err_code_e p_error(const err_code_e err);
+err_code_e err_print(const err_code_e err);
 
 /**
  * Affiche l'aide sur le flux spécifié et quitte le programme avec le code
@@ -48,6 +48,6 @@ err_code_e p_error(const err_code_e err);
  * \param stream Flux sur lequel écrire l'aide.
  * \param exit_code Code de sortie du programme.
  */
-void print_help(FILE * const stream, const int exit_code);
+void help_print(FILE * const stream, const int exit_code);
 
 #endif
