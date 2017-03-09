@@ -1,5 +1,6 @@
-# Fichier de configuration CTAGS
+# Fichier de configuration
 tags
+.gdbinit
 
 # Fichiers binaires
 compressor-0
