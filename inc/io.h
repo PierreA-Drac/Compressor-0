@@ -12,6 +12,10 @@
 
 #include <stdio.h>
 #include <stdint.h>
+/* Portabilité entre compilateur. */
+#ifndef __GNUC__
+#define  __attribute__(x)       /* NOTHING. */
+#endif
 
 /* Macro-constantes publiques =============================================== */
 
@@ -22,6 +26,9 @@
 #define BLOCK_SIZE sizeof(block_t)
 /** Longueur d'un bloc en bit. */
 #define BLOCK_LENGHT BLOCK_SIZE*CHAR_BIT
+
+/** Aligmement des grosses structures en mémoire. */
+#define ALIGN 64
 
 /* Types publiques ========================================================== */
 
@@ -42,7 +49,7 @@ struct cmp_file {
                                                    écrire. */
     block_t *p_read;            /*!< Pointeur sur le prochain bloc à lire. */
     block_t *p_write;           /*!< Pointeur sur le prochain bloc à écrire. */
-};
+} __attribute__ ((aligned(ALIGN)));
 
 /* Fonctions publiques ====================================================== */
 
