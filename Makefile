@@ -32,14 +32,17 @@ PROF_FLAGS = -pg
 CFLAGS = $(INC_FLAGS) $(DEP_FLAGS)
 LDFLAGS =
 ifeq ($(DEBUG), 1)
-    CFLAGS += -Og -g3 -Wall
+    CFLAGS += -g3 -Wall -Og
+    LDFLAGS +=
 else
-    CFLAGS += -O2 -DNDEBUG
+    CFLAGS += -flto -DNDEBUG -O2
+    LDFLAGS += -flto -s
 endif
 
 ## Lancement ..................................................................:
 
-ARGS = -c -i env/text/Shakespeare.txt --LZMA -s
+ARGS = -c -i env/text/Testfile.txt -o exe/out/Testfile.txt.cmp --RLE -s
+#ARGS = -c -i env/text/Shakespeare.txt -o exe/out/Shakespeare.txt.cmp --RLE -s
 
 # Cibles =======================================================================
 
@@ -106,8 +109,10 @@ valgrind-p2 : compil
 
 gprof :
 	make clean --no-print-directory
+	@echo "--> Compilation avec les flags nécéssaires à gprof :"
 	make run --no-print-directory CFLAGS="$(CFLAGS) $(PROF_FLAGS)" \
 	    LDFLAGS="$(LDFLAGS) $(PROF_FLAGS)"
+	@echo "--> Visionnage des résultats du profilage :"
 	gprof $(EXEC)
 
 ## Présentation ...............................................................:
