@@ -14,6 +14,7 @@
 #include "init.h"
 #include "io.h"
 #include "stats.h"
+#include "algo_rle.h"
 
 /* Point d'entrée =========================================================== */
 
@@ -31,6 +32,28 @@ int main(int argc, char *argv[])
     cmp_file_s cf = cmpf_open(pi.s_input_file, pi.s_output_file);
 
     /* Partie compression. */
+
+    int status = 0;
+    if (pi.mode == MODE_COMPRESS) {
+        switch (pi.algo) {
+            case ALGO_NONE:    /* Avoid gcc warning. */
+                break;
+            case ALGO_RLE:
+                status = rle_compress(&cf);
+                break;
+        }
+        if (status)
+            return err_print(ERR_COMPRESSION_FAILED);
+    } else {
+        switch (pi.algo) {
+            case ALGO_NONE:
+                break;
+            case ALGO_RLE:
+                break;
+        }
+        if (status)
+            return err_print(ERR_DECOMPRESSION_FAILED);
+    }
 
     /* Fin du programme. */
 
