@@ -16,12 +16,16 @@ compromis entre le temps de compression et la taille de l'objet compressé.
 
 ## Fonctionnalités à implémenter
 
-* Fonctions d'entrées/sorties génériques (en cours).
-* Fonctions de modification et lecture bit à bit.
+* Modifier la docs pour le nouvel algo.
+* Écrire détection automatique algo lors de la décompression.
+* Nouvelle gestion des noms de fichiers par défaut.
+* Privatiser les defines dans io.h.
+* Fonctions de modification bit à bit.
+    * Logarithme en base 2 d'une puissance de 2.
 * Implémentation d'arbre binaire.
 * Implémentation de tas binaire.
 * Implémentations de plusieurs algorithmes :
-    * Codage par répetition.
+    * Huffman, LZXX.
     * À déterminer.
 * Histogrammes : plusieurs modes différents (ex. : regrouper chacune des données
 par algo).
