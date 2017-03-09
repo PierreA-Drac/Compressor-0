@@ -100,7 +100,7 @@ cmp_file_s cmpf_open(const char *s_filepath_in, const char *s_filepath_out)
     return cf;
 }
 
-int cmpf_get_block(cmp_file_s * cf, block_t * b)
+inline int cmpf_get_block(cmp_file_s * cf, block_t * b)
 {
     if (!cf || !b)
         return err_print(ERR_BAD_ADRESS);
@@ -115,15 +115,14 @@ int cmpf_get_block(cmp_file_s * cf, block_t * b)
     else if (cf->p_read == &(cf->a_read_stream[cf->nb_blocks]))
         return ERR_IO_FREAD_EOF;
     /* Lit le bloc du buffer et met à jours l'adresse du prochain bloc à lire. */
-    *b = *cf->p_read;
-    cf->p_read++;
+    *b = *(cf->p_read++);
     assert(cf->p_read);
     return 0;
 }
 
-int cmpf_put_block(cmp_file_s * cf, const block_t b)
+inline int cmpf_put_block(cmp_file_s * cf, const block_t b)
 {
-    if (!cf || !b)
+    if (!cf)
         return err_print(ERR_BAD_ADRESS);
     assert(cf->a_write_stream);
     /* Si c'est la première écriture dans ce buffer. */
@@ -165,8 +164,20 @@ int cmpf_close(cmp_file_s * cf)
 
 void cmpf_rewind(cmp_file_s * cf)
 {
-    if (!cf) return;
+    if (!cf)
+        return;
     assert(cf->fp_in);
     rewind(cf->fp_in);
     cf->p_read = NULL;
+}
+
+inline byte_t blck_get_byte(const block_t blck, const char pos) {
+    /* Unsigned => nombre négatif devient très grand entier ( > BLOCK_LENGHT). */
+    assert((unsigned char)pos <= BLOCK_LENGHT-CHAR_BIT);
+    return (blck >> pos) & 0xFF;
+}
+
+inline block_t blck_put_byte(block_t blck, const byte_t byte, const char pos) {
+    assert((unsigned char)pos <= BLOCK_LENGHT-CHAR_BIT);
+    return (blck | ((uint64_t)byte << pos)) & ~((~(uint64_t)byte & 0xFF) << pos);
 }

@@ -12,6 +12,9 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <assert.h>
+#include "common.h"
+
 /* Portabilité entre compilateur. */
 #ifndef __GNUC__
 #define  __attribute__(x)       /* NOTHING. */
@@ -29,6 +32,19 @@
 
 /** Aligmement des grosses structures en mémoire. */
 #define ALIGN 64
+
+/* Macro-fonctions publiques ================================================ */
+
+#define GET_BIT(src, bit, pos) do { \
+    assert((unsigned int)(pos) < sizeof(src)*CHAR_BIT); \
+    (bit) = ((src) >> (pos)) & 0b1; \
+    } while (0)
+
+#define PUT_BIT(dest, bit, pos) do { \
+    assert((unsigned int)(pos) < sizeof(dest)*CHAR_BIT); \
+    assert((bit) == 0 || (bit) == 1); \
+    (dest) = ((dest) | ((uint64_t)(bit) << (pos))) & ~((~(uint64_t)(bit) & 0b1) << (pos)); \
+    } while (0)
 
 /* Types publiques ========================================================== */
 
@@ -100,5 +116,8 @@ int cmpf_close(cmp_file_s * cf);
  * Rembobine le fichier d'entrée de cf au début.
  */
 void cmpf_rewind(cmp_file_s * cf);
+
+byte_t blck_get_byte(const block_t blck, const char pos);
+block_t blck_put_byte(block_t blck, const byte_t byte, const char pos);
 
 #endif
