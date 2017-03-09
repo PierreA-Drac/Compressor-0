@@ -28,19 +28,19 @@
 /* Initialise une variable de type prog_info_s à 0. */
 static prog_info_s init_prog_info()
 {
-    prog_info_s P;
-    P.stat = FALSE;
-    P.mode = MODE_NONE;
-    P.algo = ALGO_NONE;
-    P.s_prog_name = NULL;
-    P.s_input_file = NULL;
-    P.s_output_file[0] = '\0';
-    return P;
+    prog_info_s pi;
+    pi.stat = FALSE;
+    pi.mode = MODE_NONE;
+    pi.algo = ALGO_NONE;
+    pi.s_prog_name = NULL;
+    pi.s_input_file = NULL;
+    pi.s_output_file[0] = '\0';
+    return pi;
 }
 
 /* Récupère les arguments en ligne de commande et les stockes dans P. Quitte le
  * programme si une erreur survient. */
-static prog_info_s get_args(prog_info_s P, const int argc, char *const *argv)
+static prog_info_s get_args(prog_info_s pi, const int argc, char *const *argv)
 {
     /* Stockage de l'argument en cours de traitement. */
     char curr_arg = 0;
@@ -56,31 +56,31 @@ static prog_info_s get_args(prog_info_s P, const int argc, char *const *argv)
         {"statistics", 0, NULL, 's'},
         {"input", 1, NULL, 'i'},
         {"output", 1, NULL, 'o'},
-        {"LZMA", 0, NULL, ALGO_LZMA},
+        {"RLE", 0, NULL, ALGO_RLE},
         {NULL, 0, NULL, 0}
     };
 
-    P.s_prog_name = argv[0];
+    pi.s_prog_name = argv[0];
     do {
         curr_arg = getopt_long(argc, argv, s_short_options, long_options, NULL);
         switch (curr_arg) {
             case 'c':
-                P.mode = MODE_COMPRESS;
+                pi.mode = MODE_COMPRESS;
                 break;
             case 'd':
-                P.mode = MODE_DECOMPRESS;
+                pi.mode = MODE_DECOMPRESS;
                 break;
             case 's':
-                P.stat = TRUE;
+                pi.stat = TRUE;
                 break;
             case 'i':
-                P.s_input_file = optarg;
+                pi.s_input_file = optarg;
                 break;
             case 'o':
-                strcat(P.s_output_file, optarg);
+                strcat(pi.s_output_file, optarg);
                 break;
-            case ALGO_LZMA:
-                P.algo = ALGO_LZMA;
+            case ALGO_RLE:
+                pi.algo = ALGO_RLE;
                 break;
             case 'h':
                 help_print(stdout, EXIT_SUCCESS);
@@ -92,7 +92,7 @@ static prog_info_s get_args(prog_info_s P, const int argc, char *const *argv)
                 abort();
         }
     } while (curr_arg != -1);
-    return P;
+    return pi;
 }
 
 /* Fonctions publiques ====================================================== */

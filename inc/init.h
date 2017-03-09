@@ -18,16 +18,15 @@ typedef enum algo algo_e;
 
 /** Liste les modes possibles de fonctionnement du programme. */
 enum mode {
-    MODE_NONE,
+    MODE_NONE = 0,              /*!< Aucun mode. */
     MODE_COMPRESS,              /*!< Mode de compression de fichier. */
     MODE_DECOMPRESS             /*!< Mode de décompression de fichier. */
 };
 
 /** Liste les algorithmes disponibles pour la compression d'un fichier. */
 enum algo {
-    ALGO_NONE,
-    ALGO_LZMA                   /*!< Valeur de test avant implémentation des
-                                   algorithmes. */
+    ALGO_NONE = 0,              /*!< Aucun algorithme. */
+    ALGO_RLE                    /*!< Run-Lenght Encoding. */
 };
 
 /* Structures publiques ===================================================== */
