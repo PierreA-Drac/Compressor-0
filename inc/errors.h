@@ -21,15 +21,17 @@ typedef enum err_code err_code_e;
 enum err_code {
     ERR_NONE = 0,               /*!< Aucune erreur. */
     ERR_BAD_ADRESS,             /*!< Pointeur null ou invalide. */
-    ERR_INIT_MISSING_OPTIONS,        /*!< Options nécéssaires au programme
+    ERR_INIT_MISSING_OPTIONS,   /*!< Options nécéssaires au programme
                                    manquantes. */
     ERR_STAT_PRINT,             /*!< Erreur pendant la récupération des
                                    statistiques. */
-    ERR_IO_FREAD,                  /*!< Erreur pendant la lecture du fichier. */
-    ERR_IO_FREAD_EOF,              /*!< Erreur pendant la lecture du fichier car la
+    ERR_IO_FREAD,               /*!< Erreur pendant la lecture du fichier. */
+    ERR_IO_FREAD_EOF,           /*!< Erreur pendant la lecture du fichier car la
                                    fin à déjà été atteinte. */
-    ERR_IO_FWRITE,                 /*!< Erreur pendant l'écriture du fichier. */
-    ERR_IO_FCLOSE                  /*!< Erreur pendant la fermeture du fichier. */
+    ERR_IO_FWRITE,              /*!< Erreur pendant l'écriture du fichier. */
+    ERR_IO_FCLOSE,              /*!< Erreur pendant la fermeture du fichier. */
+    ERR_COMPRESSION_FAILED,     /*!< Erreur durant la compression. */
+    ERR_DECOMPRESSION_FAILED    /*!< Erreur durant la décompression. */
 };
 
 /* Fonctions publiques ====================================================== */

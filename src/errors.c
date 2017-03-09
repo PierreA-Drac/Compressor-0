@@ -21,7 +21,7 @@ err_code_e err_print(const err_code_e err)
         case ERR_NONE:
             break;
         case ERR_BAD_ADRESS:
-            fprintf(stderr, "L'adresse spécifiée est invalide (ou nulle).\n");
+            fprintf(stderr, "L'adresse spécifiée est invalide.\n");
             break;
         case ERR_INIT_MISSING_OPTIONS:
             fprintf(stderr, "Une option requise est manquante pour le "
@@ -42,6 +42,12 @@ err_code_e err_print(const err_code_e err)
             break;
         case ERR_IO_FCLOSE:
             fprintf(stderr, "Fermeture du fichier impossible.\n");
+            break;
+        case ERR_COMPRESSION_FAILED:
+            fprintf(stderr, "Compression du fichier impossible.\n");
+            break;
+        case ERR_DECOMPRESSION_FAILED:
+            fprintf(stderr, "Décompression du fichier impossible.\n");
             break;
     }
     return err;
