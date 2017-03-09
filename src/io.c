@@ -26,7 +26,7 @@ static int cmpf_read_file(cmp_file_s * cf)
     assert(cf && cf->fp_in && cf->a_read_stream);
     /* Padding à 0, car sinon il peut rester des anciens bits sur les blocs non
      * complètement remplis. */
-    memset(cf->a_read_stream, '\0', BUFFER_SIZE*BLOCK_SIZE);
+    memset(cf->a_read_stream, '\0', BUFFER_SIZE * BLOCK_SIZE);
     /* Lecture sur le disque. */
     if (!(cf->nb_bytes = fread(cf->a_read_stream, sizeof(byte_t),
                                BLOCK_SIZE * BUFFER_SIZE, cf->fp_in))) {
@@ -48,14 +48,14 @@ static int cmpf_read_file(cmp_file_s * cf)
 /* Écris le bloc pointé par p_blck sur le fichier pointé par p_stream en
  * supprimant les octets égaux à 0. Renvoie 0 sur un succès,
  * -1 sur une erreur de fwrite et affiche le message correspondant. */
-static int block_write_parse(block_t * p_blck, FILE * p_stream)
+static int blck_write_parse(block_t * p_blck, FILE * p_stream)
 {
     assert(p_blck && p_stream);
     block_t mask = 0xFF;
     for (int i = 0; i < BLOCK_SIZE; i++) {
         if (*p_blck & mask) {
             if (!fwrite(p_blck, sizeof(byte_t), 1, p_stream))
-                return perror("fwrite in block_write_parse"), -1;
+                return perror("fwrite in blck_write_parse"), -1;
         }
         *p_blck >>= CHAR_BIT;
     }
@@ -75,7 +75,7 @@ static int cmpf_write_file(cmp_file_s * cf)
         return perror("fwrite in cmpf_write_file"), -1;
     }
     /* Écris le dernier bloc sans les bits à 0 en trop. */
-    if (block_write_parse(cf->p_write - 1, cf->fp_out))
+    if (blck_write_parse(cf->p_write - 1, cf->fp_out))
         return -1;
     /* Réinitialisation du pointeur d'écriture. */
     cf->p_write = cf->a_write_stream;
@@ -90,7 +90,7 @@ cmp_file_s cmpf_open(const char *s_filepath_in, const char *s_filepath_out)
     cmp_file_s cf;
     if (!(cf.fp_in = fopen(s_filepath_in, "rb")) ||
         !(cf.fp_out = fopen(s_filepath_out, "wb"))) {
-        perror("fopen in init_cmp_file");
+        perror("fopen in cmpf_open");
         exit(EXIT_FAILURE);
     }
     /* Initilisation des variables. */
@@ -135,8 +135,7 @@ inline int cmpf_put_block(cmp_file_s * cf, const block_t b)
     }
     /* Écris le bloc dans le buffer et met à jours l'adresse du prochain bloc
      * à écrire. */
-    *cf->p_write = b;
-    cf->p_write++;
+    *(cf->p_write++) = b;
     /* Padding à 0 du bloc après le dernier bloc. */
     if (cf->p_write != &(cf->a_write_stream[BUFFER_SIZE]))
         *cf->p_write = 0;
