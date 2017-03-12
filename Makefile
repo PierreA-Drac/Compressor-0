@@ -20,6 +20,8 @@ export SRC = $(shell find $(SRC_PATH)*.c)
 export INC = $(shell find $(INC_PATH)*.h)
 OBJ = $(SRC:$(SRC_PATH)%.c=$(OBJ_PATH)%.o)
 
+CALLGRIND_OUT = callgrind.out
+
 ## Compilation ................................................................:
 
 DEBUG = 1
@@ -27,7 +29,7 @@ DEBUG = 1
 CC = gcc
 INC_FLAGS = -I$(INC_PATH)
 DEP_FLAGS = -MMD -MP
-PROF_FLAGS = -pg
+GPROF_FLAGS = -pg
 
 CFLAGS = $(INC_FLAGS) $(DEP_FLAGS)
 LDFLAGS =
@@ -76,7 +78,8 @@ $(OBJ_PATH)%.o : $(SRC_PATH)%.c
 
 clean :
 	@echo "--> Suppression des fichier temporaires de $(PROJECT) :"
-	rm -f $(OBJ_PATH)*.o $(OBJ_PATH)*.d $(SRC_PATH)*~ $(INC_PATH)*~ gmon.out
+	rm -f $(OBJ_PATH)*.o $(OBJ_PATH)*.d $(SRC_PATH)*~ $(INC_PATH)*~ \
+	    gmon.out $(CALLGRIND_OUT)
 
 mrproper : clean
 	@echo "--> Suppression de l'exécutable et des fichiers produits" \
@@ -91,7 +94,7 @@ mrproper : clean
 
 gdb : compil
 	@echo "--> Debbugage avec $@ :"
-	gdb --args $(EXEC) $(ARGS)
+	$@ --args $(EXEC) $(ARGS)
 
 valgrind-p1 : compil
 	@echo "--> Debbugage avec $@ (profile 1) :"
@@ -100,22 +103,31 @@ valgrind-p1 : compil
 
 valgrind-p2 : compil
 	@echo "--> Debbugage avec $@ (profile 2) :"
-	valgrind --tool=memcheck --leak-check=full --leak-resolution=high \
+	valgrind --tool=memcheck --leak-resolution=high --leak-check=full \
 	    --show-possibly-lost=yes --show-reachable=yes --track-origins=yes \
 	    $(EXEC) $(ARGS)
 
+kcachegrind : compil
+	@echo "--> Profilage avec callgrind :"
+	valgrind --tool=callgrind --cache-sim=yes --branch-sim=yes \
+	    --callgrind-out-file="$(CALLGRIND_OUT)" $(EXEC) $(ARGS)
+	@echo "--> Visionnage du profilage avec callgrind :"
+	callgrind_annotate --auto=yes $(CALLGRIND_OUT)
+	@echo "--> Visionnage du profilage avec $@ :"
+	$@ $(CALLGRIND_OUT)
+
 gprof :
 	make clean --no-print-directory
-	make run --no-print-directory CFLAGS="$(CFLAGS) $(PROF_FLAGS)" \
-	    LDFLAGS="$(LDFLAGS) $(PROF_FLAGS)"
-	gprof $(EXEC)
+	make run --no-print-directory CFLAGS="$(CFLAGS) $(GPROF_FLAGS)" \
+	    LDFLAGS="$(LDFLAGS) $(GPROF_FLAGS)"
+	$@ $(EXEC)
 
 ## Présentation ...............................................................:
 
 indent :
 	@echo "--> Reformatage de la présentation du code (paramètres dans" \
 	    ".indent.pro) :"
-	indent $(SRC_PATH)* $(INC_PATH)*
+	$@ $(SRC_PATH)* $(INC_PATH)*
 
 ## Documentation ..............................................................:
 
@@ -159,6 +171,10 @@ help :
 	@echo "\t\tLance valgrind avec les arguments de la variables ARGS" 
 	@echo "\t\tavec le profil p1 (plus rapide mais moins précis) ou le"
 	@echo "\t\tprofil p2 (plus lent mais plus précis)."
+	@echo "\n\tmake kcachegrind [ARGS=ARGUMENTS]"
+	@echo "\t\tLance le profilage avec callgrind, affiche les résultats"
+	@echo "\t\tbruts sur la sortie standard, et lance la visualisation avec"
+	@echo "\t\tkcachegrind."
 	@echo "\n\tmake gprof [ARGS=ARGUMENTS]"
 	@echo "\t\tNettoie les fichiers temporaires et relance la compilation"
 	@echo "\t\tavec les flags necéssaires à gprof, puis affiche le résultat"

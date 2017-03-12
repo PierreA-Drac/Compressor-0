@@ -127,6 +127,11 @@ Lance gdb pour débugguer avec les arguments de la variable ARGS.
 Lance valgrind avec les arguments de la variables ARGS avec le profil p1 (plus
 rapide mais moins précis) ou le profil p2 (plus lent mais plus précis).
 
+> $ <b>make kcachegrind</b> [<b>ARGS=</b><i>ARGUMENTS</i>] <br/>
+
+Lance le profilage avec callgrind, affiche les résultats bruts sur la sortie
+standard, et lance la visualisation avec kcachegrind.
+
 > $ <b> make gprof</b> [<b>ARGS=</b><i>ARGUMENTS</i>]
 >
 Nettoie les fichiers temporaires et relance la compilation avec les flags

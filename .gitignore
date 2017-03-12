@@ -14,6 +14,7 @@ compressor-0
 *.svg
 out/
 gmon.out
+callgrind.out
 
 # Documentation
 html/
