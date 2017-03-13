@@ -21,24 +21,24 @@ INTERNET_BROWSER = firefox
 
 view : compil
 	@echo "--> Visionnement de la documentation de $(PROJECT) :"
-	$(INTERNET_BROWSER) $(DOC_PATH)html/index.html &
-	$(PDF_VIEWER) $(DOC_PATH)latex/refman.pdf &
+	$(INTERNET_BROWSER) html/index.html &
+	$(PDF_VIEWER) latex/refman.pdf &
 
 ## Compilation ................................................................:
 
-compil : $(DOC_PATH)html/index.html $(DOC_PATH)latex/refman.pdf
+compil : html/index.html latex/refman.pdf
 
-$(DOC_PATH)html/index.html : $(DEPS)
+html/index.html : $(DEPS)
 	@echo "--> Création de la documentation de $(PROJECT) :"
 	doxygen Doxyfile
 	
-$(DOC_PATH)latex/refman.pdf : $(DEPS)
+latex/refman.pdf : $(DEPS)
 	@echo "--> Compilation de la documentation en PDF de $(PROJECT)" \
-	    "dans './latex/' :"
-	make --directory="$(DOC_PATH)latex/" --no-print-directory
+	    "dans 'latex/' :"
+	make --directory="latex/" --no-print-directory
 
 ## Nettoyage ..................................................................:
 
 clean:
 	@echo "--> Suppression de la documentation de $(PROJECT) :"
-	rm -f -r $(DOC_PATH)html/ $(DOC_PATH)latex/
+	rm -f -r html/ latex/
