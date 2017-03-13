@@ -15,31 +15,34 @@
 #include <assert.h>
 #include "common.h"
 
-/* Portabilité entre compilateur. */
-#ifndef __GNUC__
-#define  __attribute__(x)       /* NOTHING. */
-#endif
-
 /* Macro-constantes publiques =============================================== */
-
-/** Taille d'un tableau contenant un fichier chargé en mémoire. */
-#define BUFFER_SIZE 2048
 
 /** Taille d'un bloc en byte. */
 #define BLOCK_SIZE sizeof(block_t)
 /** Longueur d'un bloc en bit. */
 #define BLOCK_LENGHT BLOCK_SIZE*CHAR_BIT
 
-/** Aligmement des grosses structures en mémoire. */
-#define ALIGN 64
-
 /* Macro-fonctions publiques ================================================ */
 
+/**
+ * Récupère un bit à une position donnée.
+ * Macro-fonction pour contourner le typage.
+ * \param src Variable source contenant le bit à récupérer.
+ * \param bit Entier dans laquelle sera stocké le bit (0 | 1).
+ * \param pos Entier indiquant la position du bit à récupérer.
+ */
 #define GET_BIT(src, bit, pos) do { \
     assert((unsigned int)(pos) < sizeof(src)*CHAR_BIT); \
     (bit) = ((src) >> (pos)) & 0b1; \
     } while (0)
 
+/**
+ * Met un bit à une position donnée.
+ * Macro-fonction pour contourner le typage.
+ * \param dest Variable de destination du bit à ajouter.
+ * \param bit Entier contenant le bit (0 | 1).
+ * \param pos Entier indiquant la position de l'ajout du bit.
+ */
 #define PUT_BIT(dest, bit, pos) do { \
     assert((unsigned int)(pos) < sizeof(dest)*CHAR_BIT); \
     assert((bit) == 0 || (bit) == 1); \
@@ -54,19 +57,6 @@ typedef uint64_t block_t;
 
 typedef struct cmp_file cmp_file_s;
 
-/** Correspond à un fichier en cours de traitement. */
-struct cmp_file {
-    FILE *fp_in;                /*!< Fichier entrant. */
-    FILE *fp_out;               /*!< Fichier sortant. */
-    int nb_blocks;              /*!< Nombre de bloc chargé dans "a_read_stream". */
-    int nb_bytes;               /*!< Nombre de byte chargé dans "a_read_stream". */
-    block_t a_read_stream[BUFFER_SIZE]; /*!< Flux contenant les données à lire. */
-    block_t a_write_stream[BUFFER_SIZE];        /*!< Flux contenant les données à
-                                                   écrire. */
-    block_t *p_read;            /*!< Pointeur sur le prochain bloc à lire. */
-    block_t *p_write;           /*!< Pointeur sur le prochain bloc à écrire. */
-} __attribute__ ((aligned(ALIGN)));
-
 /* Fonctions publiques ====================================================== */
 
 /**
@@ -76,9 +66,9 @@ struct cmp_file {
  * survient.
  * \param filepath_in Chemin vers le fichier entrant.
  * \param filepath_out Chemin vers le fichier sortant.
- * \return Structure d'un fichier prêt à être traité.
+ * \return Pointeur vers la structure d'un fichier prêt à être traité.
  */
-cmp_file_s cmpf_open(const char *s_filepath_in, const char *s_filepath_out);
+cmp_file_s *cmpf_open(const char *s_filepath_in, const char *s_filepath_out);
 
 /**
  * Lit un bloc de donnée du fichier entrant pointé par cf depuis son buffer, et
@@ -104,7 +94,7 @@ int cmpf_put_block(cmp_file_s * cf, block_t b);
 
 /**
  * Vide le buffer d'écriture sur le disque, ferme les flux vers les fichiers
- * entrant et sortant, et réinitialise la structure comme lors de la création.
+ * entrant et sortant, et libère la mémoire de la structure.
  * \param cf Fichier à fermer.
  * \return 0 sur un succès, ERR_BAD_ADRESS si un pointeur est incorrect (affiche
  * un message), ou ERR_IO_FWRITE si un problème survient lors du flush du buffer
@@ -113,11 +103,28 @@ int cmpf_put_block(cmp_file_s * cf, block_t b);
 int cmpf_close(cmp_file_s * cf);
 
 /**
- * Rembobine le fichier d'entrée de cf au début.
+ * Rembobine le fichier d'entrée.
+ * \param cf Pointeur vers une structure contenant le fichier entrant à
+ * rembobiner.
  */
 void cmpf_rewind(cmp_file_s * cf);
 
-byte_t blck_get_byte(const block_t blck, const char pos);
-block_t blck_put_byte(block_t blck, const byte_t byte, const char pos);
+/**
+ * Récupère un byte depuis un bloc à une position donnée.
+ * \param blck Bloc source.
+ * \param pos Position pour récupérer le byte (bit de poids faible).
+ * \return byte_t Byte récupérer.
+ */
+byte_t blck_get_byte(const block_t blck, const int pos);
+
+/**
+ * Ajoute un byte dans un bloc cible sur une position donnée. Le bloc n'a pas
+ * besoin d'être initialisé à 0.
+ * \param blck Bloc cible.
+ * \param byte Byte à ajouter.
+ * \param pos Position cible (bit de poids faible).
+ * \return block_t Bloc modifié.
+ */
+block_t blck_put_byte(block_t blck, const byte_t byte, const int pos);
 
 #endif
