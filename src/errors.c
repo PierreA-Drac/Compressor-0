@@ -47,12 +47,12 @@ err_code_e err_print(const err_code_e err)
     return err;
 }
 
-void help_print(FILE * const stream, const int exit_code)
+void help_print(FILE * const p_stream, const int exit_code, const char *s_name)
 {
-    fprintf(stream,
+    fprintf(p_stream,
             "Affichage de l'aide :\n\n"
             "Synopsis :\n"
-            "\tcompressor-0 -c|-d -i INPUT FILE [-o OUTPUT FILE]"
+            "\t%s -c|-d -i INPUT FILE [-o OUTPUT FILE]"
             "[ALGORITHM FLAG] [-s] [-h]\n\n"
             "Options :\n"
             "\t-h, --help\n"
@@ -77,8 +77,8 @@ void help_print(FILE * const stream, const int exit_code)
             "\t\tCompresse le fichier en utilisant l'algorithme LZMA.\n"
             "\t\t(Ici à titre d'exemple, algorithme non implémenté).\n\n"
             "Exemples :\n"
-            "\tcompressor -c -i env/corpus/text.txt -o text.cmp --LZMA -s\n\n"
-            "\tcompressor --decompress --input=\"text.cmp\""
-            "--output=\"text.txt\"\n\n");
+            "\t%s -c -i env/corpus/text.txt -o text.cmp --LZMA -s\n\n"
+            "\t%s --decompress --input=\"text.cmp\""
+            "--output=\"text.txt\"\n\n", s_name, s_name, s_name);
     exit(exit_code);
 }

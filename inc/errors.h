@@ -45,9 +45,11 @@ err_code_e err_print(const err_code_e err);
 /**
  * Affiche l'aide sur le flux spécifié et quitte le programme avec le code
  * d'erreur spécifié.
- * \param stream Flux sur lequel écrire l'aide.
+ * \param p_stream Flux sur lequel écrire l'aide.
  * \param exit_code Code de sortie du programme.
+ * \param s_name Pointeur vers la chaîne de caractère contenant le nom du
+ * programme.
  */
-void help_print(FILE * const stream, const int exit_code);
+void help_print(FILE * const p_stream, const int exit_code, const char *s_name);
 
 #endif
