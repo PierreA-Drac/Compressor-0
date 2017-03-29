@@ -48,17 +48,18 @@ sortant gardera le nom du fichier source et sera écrit dans le répertoire
 .SS ALGORITHMS FLAG
 
 .TP
-\fB--LZMA
-Compresse le fichier en utilisant l'algorithme LZMA. (Ici à titre
-d'exemple, algorithme non implémenté).
+\fB--RLE
+Compresse le fichier en utilisant l'algorithme RLE (Run-Lenght Encoding).
+L'algorithme nécéssite obligatoirement un fichier encodé en ASCII pour
+fonctionner.
 
 .SH EXIT STATUS
-Retourne la valeur 0 si la compression s'est bien effectuée.
+Retourne 0 si la compression s'est bien effectuée, ou -1 sur une erreur.
 
 .SH EXAMPLES
 
 \fBcompressor -c -i \fIenv/corpus/text.txt \fB-o \fItext.cmp
-\fB--LZMA -s
+\fB--RLE -s
 
 \fBcompressor --decompress --input=\fI"text.cmp"
 \fB--output=\fI"text.txt"
