@@ -32,7 +32,23 @@
  * 2 <= REP_CODE_LENGHT <= 7. */
 #define REP_CODE_LENGHT 3       /* Valeur optimale déterminée empiriquement. */
 
+/* Utilisés pour gérer le déplacement dans les blocs en fonction de la
+ * compression ou de la décompression. */
+#define RLE_MODE_COMPRESS 0
+#define RLE_MODE_DECOMPRESS 1
+
+/* Variables globales privées =============================================== */
+
+/* Mode de déplacement sur les blocs lors de l'écriture et de la lecture. 0
+ * permet une lecture du bit de poids faible vers le bit de fort du bloc et une
+ * écriture du bit de poids fort vers le bit de poids faible du bloc, et 1
+ * permet une lecture du bit de poids fort vers le bit de poids faible du bloc
+ * et une écriture du bit de poids faible vers le bit de poids fort du bloc. */
+static int RLE_MODE_MOV;
+
 /* Fonctions privées ======================================================== */
+
+/* # Écriture =============================================================== */
 
 /* Fonctions de manipulation de bloc par RLE. Ces fonctions sont spécifiques à
  * cet algorithme car RLE utilise un traitement de bloc particulier (écrit dans
@@ -42,34 +58,70 @@
  * fonctions). */
 
 /* Vide le bloc "blck" dans la structure "cf". Réinitialise le bloc à 0 et la
- * position "pos" à la longueur du bloc. Renvoie 0 sur un succès, -1 sur une
- * erreur. */
+ * position "pos" pour la prochaine écriture.
+ * Renvoie 0 sur un succès, -1 sur une erreur et positionne "CMP_err" sur
+ * l'erreur correspondante.
+ * Erreurs : ERR_BAD_ADRESS si un pointeur est incorrect, ERR_IO_FWRITE si une
+ * erreur survient lors de l'écriture. */
 static int rle_blck_flush(cmp_file_s * cf, block_t * blck, int *pos);
-inline static int rle_blck_flush(cmp_file_s * cf, block_t * blck, int *pos)
+static inline int rle_blck_flush(cmp_file_s * cf, block_t * blck, int *pos)
 {
     assert(cf && blck && pos);
-    if (cmpf_put_block(cf, *blck))
-        return -1;
+    block_t blck_tmp = *blck;
     *blck = 0;
-    *pos = BLOCK_LENGHT;
-    return 0;
+    *pos = !RLE_MODE_MOV ? BLOCK_LENGHT : 0;
+    return cmpf_put_block(cf, blck_tmp);
 }
 
 /* Ajoute un bit à la position "pos" au bloc "blck". Le bloc sera vidé dans "cf"
- * s'il n'y a pas assez de place pour rajouter le bit. La position sera modifiée
- * automatiquement pour l'écriture du bit. Renvoie 0 sur un succès, -1 sur une
- * erreur. */
+ * automatiquement pour l'écriture du bit.
+ * Renvoie 0 sur un succès, ou -1 sur une erreur et "CMP_err" sera positionné
+ * sur l'erreur correspondante.
+ * Erreurs : ERR_BAD_ADRESS si un pointeur est incorrect, ERR_IO_FWRITE si une
+ * erreur survient lors de l'écriture. */
 static int rle_blck_put_bit(cmp_file_s * cf, block_t * blck,
                             const int bit, int *pos);
-inline static int rle_blck_put_bit(cmp_file_s * cf, block_t * blck,
+static inline int rle_blck_put_bit(cmp_file_s * cf, block_t * blck,
                                    const int bit, int *pos)
 {
-    if (*pos == 0) {            /* Cas où le bloc est plein. */
-        if (rle_blck_flush(cf, blck, pos))
+    assert(cf && blck && pos);
+    assert(bit == 0 || bit == 1);
+    /* Cas où le bloc est plein. */
+    if (*pos + RLE_MODE_MOV == 0 || *pos + RLE_MODE_MOV == BLOCK_LENGHT + 1) {
+        if ((rle_blck_flush(cf, blck, pos)))
             return -1;
     }
-    (*pos)--;
+    /* Déplacement avant l'écriture si on compresse. */
+    *pos -= 1 - RLE_MODE_MOV;
     PUT_BIT(*blck, bit, *pos);
+    /* Déplacement après l'écriture si on décompresse. */
+    *pos += RLE_MODE_MOV;
+    return 0;
+}
+
+/* Écris le mot "byte" de longueur "w_len" bit par bit sur le bloc "blck" à la
+ * position "pos" (bit de poids faible). Le bloc sera vidé automatiquement dans
+ * "cf" s'il n'y a plus de place pour le mot. La position sera modifiée
+ * automatiquement pour l'écriture du mot.
+ * Renvoie 0 sur un succès, ou -1 sur une erreur et "CMP_err" sera positionné
+ * sur l'erreur correspondante.
+ * Erreurs : ERR_BAD_ADRESS si un pointeur est incorrect, ERR_IO_FWRITE si une
+ * erreur survient lors de l'écriture. */
+static int rle_blck_put_word_by_bit(cmp_file_s * cf, block_t * blck, int *pos,
+                                    const byte_t byte, const int w_len);
+static inline int rle_blck_put_word_by_bit(cmp_file_s * cf, block_t * blck,
+                                           int *pos, const byte_t byte,
+                                           const int w_len)
+{
+    assert(cf && blck && pos);
+    assert((unsigned int)w_len <= CHAR_BIT);
+    for (int i = (1 - RLE_MODE_MOV) * (w_len - 1); (unsigned int)i < w_len;
+         i += -(1 - RLE_MODE_MOV) + RLE_MODE_MOV) {
+        byte_t bit;
+        GET_BIT(byte, bit, i);
+        if (rle_blck_put_bit(cf, blck, bit, pos))
+            return -1;
+    }
     return 0;
 }
 
@@ -78,23 +130,25 @@ inline static int rle_blck_put_bit(cmp_file_s * cf, block_t * blck,
  * "CHAR_BIT" (meilleur performance), ou bit par bit s'il est plus petit. Le
  * bloc sera vidé automatiquement dans "cf" s'il n'y a plus de place pour le
  * mot. La position sera modifiée automatiquement pour l'écriture du mot.
- * Renvoie 0 sur un succès, -1 sur une erreur. */
+ * Renvoie 0 sur un succès, ou -1 sur une erreur et "CMP_err" sera positionné
+ * sur l'erreur correspondante.
+ * Erreurs : ERR_BAD_ADRESS si un pointeur est incorrect, ERR_IO_FWRITE si une
+ * erreur survient lors de l'écriture. */
 static int rle_blck_put_word(cmp_file_s * cf, block_t * blck, int *pos,
                              const byte_t byte, const int w_len);
-inline static int rle_blck_put_word(cmp_file_s * cf, block_t * blck, int *pos,
+static inline int rle_blck_put_word(cmp_file_s * cf, block_t * blck, int *pos,
                                     const byte_t byte, const int w_len)
 {
-    /* Cas où il n'y a pas la place pour le mot, ou qu'il est plus petit que 8
-     * bits et qu'il faut l'écrire bit par bit (code de répétition). */
-    if (w_len < CHAR_BIT || *pos < w_len) {
-        for (char i = w_len - 1; i >= 0; i--) {
-            byte_t bit;
-            GET_BIT(byte, bit, i);
-            if (rle_blck_put_bit(cf, blck, bit, pos))
-                return -1;
-        }
+    assert(cf && blck && pos);
+    assert((unsigned int)w_len <= CHAR_BIT);
+    /* Cas où le mot est plus petit que 8 bits (code de répétition), ou qu'il
+     * n'y a pas la place pour écrire le mot. */
+    if (w_len < CHAR_BIT || (!RLE_MODE_MOV && *pos < CHAR_BIT)
+        || (RLE_MODE_MOV && *pos > BLOCK_LENGHT - CHAR_BIT)) {
+        if (rle_blck_put_word_by_bit(cf, blck, pos, byte, w_len))
+            return -1;
     } else {
-        *pos -= CHAR_BIT;
+        *pos -= (1 - RLE_MODE_MOV) * CHAR_BIT;  /* Déplacement compression. */
         *blck = blck_put_byte(*blck, byte, *pos);
     }
     return 0;
