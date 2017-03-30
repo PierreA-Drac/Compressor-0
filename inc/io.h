@@ -62,7 +62,7 @@ typedef struct cmp_file cmp_file_s;
 /**
  * Initialise les flux vers les fichiers entrant et sortant, initialise la
  * structure pour qu'elle soit prête à être utilisée et assure les routines de
- * détection d'erreurs. Quitte le programme avec EXIT_FAILURE si une erreur
+ * détection d'erreurs. Quitte le programme avec "EXIT_FAILURE" si une erreur
  * survient.
  * \param filepath_in Chemin vers le fichier entrant.
  * \param filepath_out Chemin vers le fichier sortant.
@@ -71,24 +71,26 @@ typedef struct cmp_file cmp_file_s;
 cmp_file_s *cmpf_open(const char *s_filepath_in, const char *s_filepath_out);
 
 /**
- * Lit un bloc de donnée du fichier entrant pointé par cf depuis son buffer, et
- * le stocke dans le bloc pointé par b.
- * \param cf Fichier traité.
+ * Lit un bloc de donnée du fichier entrant depuis son buffer, et le stocke dans
+ * un bloc.
+ * \param cf Fichier source.
  * \param b Bloc à remplir.
- * \return 0 sur un succès, ERR_BAD_ADRESS si un pointeur est incorrect (affiche
- * un message), ERR_IO_FREAD si une erreur survient lors de la lecture (affiche
- * un message), et ERR_IO_FREAD_EOF si on à déjà lu la fin du fichier.
+ * \return 0 sur un succès, -1 sur une erreur et positionne "CMP_err" sur
+ * l'erreur correspondante.
+ * \error ERR_BAD_ADRESS si un pointeur est incorrect.
+ * \error ERR_IO_FREAD si une erreur survient lors de la lecture.
+ * \error ERR_IO_FREAD_EOF si on à déjà lu la fin du fichier.
  */
 int cmpf_get_block(cmp_file_s * cf, block_t * b);
 
 /**
- * Écris le bloc de donnée pointé par b sur le buffer du fichier sortant pointé
- * par cf.
- * \param cf Fichier traité.
+ * Écris un bloc de donnée sur un buffer d'un fichier sortant.
+ * \param cf Fichier sortant.
  * \param b Bloc à écrire.
- * \return 0 sur un succès, ERR_BAD_ADRESS si un pointeur est incorrect (affiche
- * un message), ou ERR_IO_FWRITE si une erreur survient lors de l'écriture
- * (affiche un message).
+ * \return 0 sur un succès, -1 sur une erreur et positionne "CMP_err" sur
+ * l'erreur correspondante.
+ * \error ERR_BAD_ADRESS si un pointeur est incorrect.
+ * \error ERR_IO_FWRITE si une erreur survient lors de l'écriture.
  */
 int cmpf_put_block(cmp_file_s * cf, block_t b);
 
@@ -96,9 +98,11 @@ int cmpf_put_block(cmp_file_s * cf, block_t b);
  * Vide le buffer d'écriture sur le disque, ferme les flux vers les fichiers
  * entrant et sortant, et libère la mémoire de la structure.
  * \param cf Fichier à fermer.
- * \return 0 sur un succès, ERR_BAD_ADRESS si un pointeur est incorrect (affiche
- * un message), ou ERR_IO_FWRITE si un problème survient lors du flush du buffer
- * d'écriture (affiche un message).
+ * \return 0 sur un succès, ou -1 sur une erreur et positionne "CMP_err" à
+ * l'erreur correspondante.
+ * \error ERR_BAD_ADRESS si un pointeur est incorrect
+ * \error ERR_IO_FWRITE si un problème survient lors du flush du buffer
+ * d'écriture sur le disque.
  */
 int cmpf_close(cmp_file_s * cf);
 
