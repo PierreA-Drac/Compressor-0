@@ -26,3 +26,15 @@
  * \error ERR_COMPRESSION_FAILED si une erreur survient lors de la compression.
  */
 int rle_compress(cmp_file_s * cf);
+
+/**
+ * Lance la décompression RLE sur un fichier entrant et l'inscris sur un fichier
+ * sortant.
+ * \param cf Pointeur vers une structure de couple fichier entrant/sortant à
+ * décompresser.
+ * \return 0 sur succès, -1 sur une erreur et positionne "CMP_err" sur l'erreur
+ * correspondante.
+ * \error ERR_BAD_ADRESS si le pointeur est nulle ou invalide.
+ * \error ERR_DECOMPRESSION_FAILED si une erreur survient lors de la décompression.
+ */
+int rle_decompress(cmp_file_s * cf);

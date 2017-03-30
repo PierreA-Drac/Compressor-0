@@ -322,8 +322,45 @@ int rle_compress(cmp_file_s * cf)
     return 0;
 }
 
+int rle_decompress(cmp_file_s * cf)
+{
+    if (!cf)
+        return CMP_err = ERR_BAD_ADRESS, -1;
+    CMP_err = ERR_NONE;
+
+    RLE_MODE_MOV = RLE_MODE_DECOMPRESS; /* Déplacement pour ce mode (décompression). */
+    block_t blck_in = 0, blck_out = 0;  /* Blocs de données. */
+    byte_t byte = 1, rep_code = 1;      /* Octet de lecture, code de répétition. */
+    int ind_in = 0, ind_out = 0, bit = 0;       /* Indice et bit. */
+
+    /* Parsing des blocs de données entrant (récupération des blocs
+     * automatiques). */
+    while (!CMP_err) {
+        /* Récupération du premier bit d'identification. */
+        rle_blck_get_bit(cf, &blck_in, &bit, &ind_in);
+        /* Cas sans répétition, écriture du caractère. */
+        if (!bit) {
+            /* Récupération du caractère (relecture bit de poids fort). */
+            ind_in++;
+            rle_blck_get_word(cf, &blck_in, &ind_in, &byte, CHAR_BIT);
+            /* Écriture du caractère. */
+            rle_blck_put_word(cf, &blck_out, &ind_out, byte, CHAR_BIT);
         }
-        byte_1 = byte_2;        /* Switch avant la lecture du premier caractère. */
+        /* Cas avec répétition. */
+        else {
+            /* Récupération du code. */
+            rle_blck_get_word(cf, &blck_in, &ind_in, &rep_code,
+                              REP_CODE_LENGHT);
+            /* Récupération du caractère. */
+            rle_blck_get_word(cf, &blck_in, &ind_in, &byte, CHAR_BIT);
+            /* Écriture du caractère REP_CODE fois. */
+            for (int i = 0; i < rep_code; i++)
+                rle_blck_put_word(cf, &blck_out, &ind_out, byte, CHAR_BIT);
+        }
     }
+    /* Si erreur pendant la décompression ou l'écriture du dernier bloc. */
+    if ((CMP_err != ERR_IO_FREAD_EOF && CMP_err)
+        || cmpf_put_block(cf, blck_out))
+        return err_print(CMP_err), CMP_err = ERR_DECOMPRESSION_FAILED, -1;
     return 0;
 }
