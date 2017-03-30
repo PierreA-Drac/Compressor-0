@@ -150,7 +150,112 @@ static inline int rle_blck_put_word(cmp_file_s * cf, block_t * blck, int *pos,
     } else {
         *pos -= (1 - RLE_MODE_MOV) * CHAR_BIT;  /* Déplacement compression. */
         *blck = blck_put_byte(*blck, byte, *pos);
+        *pos += RLE_MODE_MOV * CHAR_BIT;        /* Déplacement décompression. */
     }
+    return 0;
+}
+
+/* # Lecture ================================================================ */
+
+/* Recharge le bloc "blck" depuis la structure "cf". Réinitialise la position
+ * "pos" pour la prochaine lecture.
+ * Renvoie 0 sur un succès, ou -1 sur une erreur et "CMP_err" sera positionné
+ * sur l'erreur correspondante.
+ * Erreurs : ERR_BAD_ADRESS si un pointeur est incorrect, ERR_IO_FREAD si une
+ * erreur survient lors de la lecture, ERR_IO_FREAD_EOF si on à déjà lu la fin
+ * du fichier. */
+static int rle_blck_reload(cmp_file_s * cf, block_t * blck, int *pos);
+static inline int rle_blck_reload(cmp_file_s * cf, block_t * blck, int *pos)
+{
+    assert(cf && blck && pos);
+    *pos = RLE_MODE_MOV ? BLOCK_LENGHT : 0;
+    return cmpf_get_block(cf, blck);
+}
+
+/* Récupère un bit à la position "pos" au bloc "blck". Le bloc sera recharger
+ * depuis "cf" si besoin. La position sera modifiée automatiquement pour la
+ * lecture du bit.
+ * Renvoie 0 sur un succès, ou -1 sur une erreur et "CMP_err" sera positionné
+ * sur l'erreur correspondante.
+ * Erreurs : ERR_BAD_ADRESS si un pointeur est incorrect, ERR_IO_FREAD si une
+ * erreur survient lors de la lecture, ERR_IO_FREAD_EOF si on à déjà lu la fin
+ * du fichier. */
+static int rle_blck_get_bit(cmp_file_s * cf, block_t * blck,
+                            int *bit, int *pos);
+static inline int rle_blck_get_bit(cmp_file_s * cf, block_t * blck,
+                                   int *bit, int *pos)
+{
+    assert(cf && blck && bit && pos);
+    /* Cas où le bloc est vide. */
+    if (*pos + (1 - RLE_MODE_MOV) == 0
+        || *pos + (1 - RLE_MODE_MOV) == BLOCK_LENGHT + 1) {
+        if (rle_blck_reload(cf, blck, pos))
+            return -1;
+    }
+    *pos -= RLE_MODE_MOV;
+    GET_BIT(*blck, *bit, *pos);
+    *pos += 1 - RLE_MODE_MOV;
+    assert(*bit == 0 || *bit == 1);
+    return 0;
+}
+
+/* Récupère un mot de longueur "w_len" bit par bit sur le bloc "blck" à la
+ * position "pos" (bit de poids faible) et le stocke dans "byte". Le bloc sera
+ * recharger automatiquement dans "cf" si besoin. La position sera modifiée
+ * automatiquement pour la lecture du mot.
+ * Renvoie 0 sur un succès, ou -1 sur une erreur et "CMP_err" sera positionné
+ * sur l'erreur correspondante.
+ * Erreurs : ERR_BAD_ADRESS si un pointeur est incorrect, ERR_IO_FREAD si une
+ * erreur survient lors de la lecture, ERR_IO_FREAD_EOF si on à déjà lu la fin
+ * du fichier. */
+static int rle_blck_get_word_by_bit(cmp_file_s * cf, block_t * blck, int *pos,
+                                    byte_t * byte, const int w_len);
+static inline int rle_blck_get_word_by_bit(cmp_file_s * cf, block_t * blck,
+                                           int *pos, byte_t * byte,
+                                           const int w_len)
+{
+    assert(cf && blck && pos);
+    assert((unsigned int)w_len <= CHAR_BIT);
+    for (int i = (RLE_MODE_MOV) * (w_len - 1), bit = 0; (unsigned int)i < w_len;
+         i -= -(1 - RLE_MODE_MOV) + RLE_MODE_MOV) {
+        if (rle_blck_get_bit(cf, blck, &bit, pos))
+            return -1;
+        PUT_BIT(*byte, bit, i);
+    }
+    return 0;
+}
+
+/* Récupère un mot de longueur "w_len" dans le bloc "blck" à la position "pos"
+ * (bit de poids faible), et le stocke dans "byte". Lit le mot d'un seul coup si
+ * possible, ou si le mot est coupé entre deux bloc ou plus petit que 8 bits, on
+ * lit le mot bit à bit et récupère un nouveau bloc dans "cf" si besoin. Modifie
+ * la position pour la lecture du mot.
+ * Renvoie 0 sur un succès, ou -1 sur une erreur et "CMP_err" sera positionné
+ * sur l'erreur correspondante.
+ * Erreurs : ERR_BAD_ADRESS si un pointeur est incorrect, ERR_IO_FREAD si une
+ * erreur survient lors de la lecture, ERR_IO_FREAD_EOF si on à déjà lu la fin
+ * du fichier. */
+static int rle_blck_get_word(cmp_file_s * cf, block_t * blck, int *pos,
+                             byte_t * byte, const int w_len);
+static inline int rle_blck_get_word(cmp_file_s * cf, block_t * blck, int *pos,
+                                    byte_t * byte, const int w_len)
+{
+    assert(cf && blck && pos && byte);
+    assert((unsigned int)w_len <= CHAR_BIT);
+    /* Cas où le mot est coupé entre deux blocs, ou qu'il est plus petit que 8
+     * bits : il faut le lire bit par bit. */
+    if (w_len < CHAR_BIT || (RLE_MODE_MOV && *pos < CHAR_BIT)
+        || (!RLE_MODE_MOV && *pos > BLOCK_LENGHT - CHAR_BIT)) {
+        if (rle_blck_get_word_by_bit(cf, blck, pos, byte, w_len))
+            return -1;
+    } else {
+        *pos -= RLE_MODE_MOV * CHAR_BIT;
+        *byte = blck_get_byte(*blck, *pos);
+        *pos += (1 - RLE_MODE_MOV) * CHAR_BIT;
+    }
+    /* Si byte == 0, on est à la fin de notre bloc. */
+    if (!(*byte))
+        return CMP_err = ERR_IO_FREAD_EOF, -1;
     return 0;
 }
 
