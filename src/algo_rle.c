@@ -14,10 +14,12 @@
  * qu'un seul de ces caractères précédé par un bit à 1 puis d'un code de
  * répétition sur 2 bits indiquant le nombre d'apparition du caractère. Ce
  * premier bit à 1 permettra d'identifier un code de répétition par rapport à un
- * caractère codé sur 8 bits. */
+ * caractère codé sur 8 bits.
+ * L'algorithme nécessite des fichiers encodés en ASCII pour fonctionner. */
 
 #include <stdio.h>
 #include <limits.h>
+#include <assert.h>
 #include "errors.h"
 #include "io.h"
 #include "common.h"
@@ -26,16 +28,18 @@
 
 /* Valeur maximal du code de répétition. */
 #define REP_CODE_MAX ((0b1 << REP_CODE_LENGHT)-1)
-/* Nombre de bit du code de répétition (sans compter le premier bit ID.) */
+/* Nombre de bit du code de répétition (sans compter le premier bit ID).
+ * 2 <= REP_CODE_LENGHT <= 7. */
 #define REP_CODE_LENGHT 3       /* Valeur optimale déterminée empiriquement. */
 
 /* Fonctions privées ======================================================== */
 
 /* Fonctions de manipulation de bloc par RLE. Ces fonctions sont spécifiques à
  * cet algorithme car RLE utilise un traitement de bloc particulier (écrit dans
- * le sens inverse de la lecture, et gère ses indices de position différemment). 
- * Les prototypes sont rajouté car obligatoire pour l'inlining (sinon, gcc
- * annonce qu'il manque des références sur ces fonctions). */
+ * le sens inverse de la lecture pour la compression, gère donc ses indices de
+ * position différemment). Les prototypes sont rajouté car obligatoire pour
+ * l'inlining (sinon, gcc annonce qu'il manque des références sur ces
+ * fonctions). */
 
 /* Vide le bloc "blck" dans la structure "cf". Réinitialise le bloc à 0 et la
  * position "pos" à la longueur du bloc. Renvoie 0 sur un succès, -1 sur une
