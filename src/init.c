@@ -124,7 +124,7 @@ prog_info_s init_prog(const int argc, char *const *argv)
         /* Crée le répertoire de sortie par défaut si besoin. */
         if (mkdir(pinfo.s_output_file, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |
                   S_IROTH) && errno != EEXIST) {
-            perror("mkdir in init_prog");
+            perror("mkdir for initialization");
             exit(EXIT_FAILURE);
         }
         /* Ajoute le nom du fichier source. */

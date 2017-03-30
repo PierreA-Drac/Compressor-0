@@ -33,35 +33,33 @@ int main(int argc, char *argv[])
 
     /* Partie compression. */
 
-    int status = 0;
+#pragma GCC diagnostic ignored "-Wswitch"
     if (pi.mode == MODE_COMPRESS) {
         switch (pi.algo) {
-            case ALGO_NONE:    /* Avoid gcc warning. */
-                break;
             case ALGO_RLE:
-                status = rle_compress(cf);
+                rle_compress(cf);
                 break;
         }
-        if (status)
-            return err_print(ERR_COMPRESSION_FAILED);
+        if (CMP_err == ERR_COMPRESSION_FAILED)
+            return err_print(CMP_err), -1;
     } else {
         switch (pi.algo) {
-            case ALGO_NONE:
-                break;
             case ALGO_RLE:
+                rle_decompress(cf);
                 break;
         }
-        if (status)
-            return err_print(ERR_DECOMPRESSION_FAILED);
+        if (CMP_err == ERR_DECOMPRESSION_FAILED)
+            return err_print(CMP_err), -1;
     }
+#pragma GCC diagnostic pop
 
     /* Fin du programme. */
 
     /* Fermeture des flux. */
     if (cmpf_close(cf))
-        return err_print(ERR_IO_FCLOSE);
+        return err_print(CMP_err), -1;
     /* Génération des statistiques si demandé. */
     if (pi.stat && stat_print(pi.s_input_file, pi.s_output_file))
-        err_print(ERR_STAT_PRINT);
+        err_print(ERR_STAT);
     return 0;
 }
