@@ -34,14 +34,24 @@ GPROF_FLAGS = -pg
 CFLAGS = $(INC_FLAGS) $(DEP_FLAGS)
 LDFLAGS =
 ifeq ($(DEBUG), 1)
-    CFLAGS += -Og -g3 -Wall
+    CFLAGS += -g3 -Wall -Og
+    LDFLAGS +=
 else
-    CFLAGS += -O2 -DNDEBUG
+    CFLAGS += -flto -DNDEBUG -O2
+    LDFLAGS += -flto -s
 endif
 
 ## Lancement ..................................................................:
 
-ARGS = -c -i env/text/Shakespeare.txt --LZMA -s
+FILE_DIR = env/text/
+FILE_NAME = Shakespeare.txt
+FILE_ORIG = '$(FILE_DIR)$(FILE_NAME)'
+FILE_CMPR = '$(OUT_PATH)$(FILE_NAME).cmp'
+FILE_DCMP = '$(OUT_PATH)$(FILE_NAME)'
+
+ARGS = $(ARGS_CMPR)
+ARGS_CMPR = -c -i $(FILE_ORIG) -o $(FILE_CMPR) --RLE -s
+ARGS_DCMP = -d -i $(FILE_CMPR) -o $(FILE_DCMP) --RLE -s
 
 # Cibles =======================================================================
 
@@ -52,6 +62,22 @@ ARGS = -c -i env/text/Shakespeare.txt --LZMA -s
 run : compil 
 	@echo "--> Lancement de '$(EXEC)' :"
 	$(EXEC) $(ARGS)
+
+test : compil
+	@echo "--> Fichier original :"
+	@head $(FILE_ORIG)
+	@tail $(FILE_ORIG)
+	@echo "--> Compression :"
+	$(EXEC) $(ARGS_CMPR)
+	@echo "--> Décompression :"
+	$(EXEC) $(ARGS_DCMP)
+	@echo "--> Fichier décompressé :"
+	@head $(FILE_DCMP)
+	@tail $(FILE_DCMP)
+	@echo "--> Statistiques des fichiers :"
+	@wc $(FILE_ORIG)
+	@wc $(FILE_CMPR)
+	@wc $(FILE_DCMP)
 
 ## Benchmark ..................................................................:
 
@@ -80,6 +106,7 @@ clean :
 	@echo "--> Suppression des fichier temporaires de $(PROJECT) :"
 	rm -f $(OBJ_PATH)*.o $(OBJ_PATH)*.d $(SRC_PATH)*~ $(INC_PATH)*~ \
 	    gmon.out $(CALLGRIND_OUT)
+	find . -name .fuse_hidden* -exec rm -f '{}' \;
 
 mrproper : clean
 	@echo "--> Suppression de l'exécutable et des fichiers produits" \
@@ -118,8 +145,10 @@ kcachegrind : compil
 
 gprof :
 	make clean --no-print-directory
+	@echo "--> Compilation avec les flags nécéssaires à $@ :"
 	make run --no-print-directory CFLAGS="$(CFLAGS) $(GPROF_FLAGS)" \
 	    LDFLAGS="$(LDFLAGS) $(GPROF_FLAGS)"
+	@echo "--> Visionnage des résultats du profilage :"
 	$@ $(EXEC)
 
 ## Présentation ...............................................................:
@@ -149,6 +178,9 @@ help :
 	@echo "Cibles :"
 	@echo "\tmake [run] [ARGS=ARGUMENTS]"
 	@echo "\t\tLance le programme avec les arguments de la variable ARGS."
+	@echo "\n\tmake test [FILE_NAME=NAME] [FILE_DIR=PATH]"
+	@echo "\t\tLance une série compression/décompression sur un fichier"
+	@echo "\t\tspécifié par les variables FILE_NAME et FILE_DIR."
 	@echo "\n\tmake benchmark"
 	@echo "\t\tLance les benchmarks sur les algorithmes spécifiés dans le"
 	@echo "\t\tMakefile du dossier "bench/" et les fichiers présents dans"

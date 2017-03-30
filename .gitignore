@@ -1,5 +1,7 @@
-# Fichier de configuration CTAGS
+# Fichier de configuration
 tags
+.gdbinit
+.ycm_extra_conf.py
 
 # Fichiers binaires
 compressor-0

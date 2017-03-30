@@ -24,7 +24,8 @@ void stat_init();
  * sortie standard. La fonction stat_init doit être appellée avant stat_print.
  * \param filepath_in Chemin vers le fichier entrant.
  * \param filepath_out Chemin vers le fichier sortant.
- * \return Si succès 0 est retourné, si erreur -1 est retourné.
+ * \return 0 sur un succès, ou -1 sur une erreur.
+ * \error ERR_STAT si une erreur est survenu.
  */
 int stat_print(const char *s_filepath_in, const char *s_filepath_out);
 

@@ -14,6 +14,7 @@
 #include "init.h"
 #include "io.h"
 #include "stats.h"
+#include "algo_rle.h"
 
 /* Point d'entrée =========================================================== */
 
@@ -28,17 +29,37 @@ int main(int argc, char *argv[])
     if (pi.stat)
         stat_init();
     /* Ouverture des flux. */
-    cmp_file_s cf = cmpf_open(pi.s_input_file, pi.s_output_file);
+    cmp_file_s *cf = cmpf_open(pi.s_input_file, pi.s_output_file);
 
     /* Partie compression. */
+
+#pragma GCC diagnostic ignored "-Wswitch"
+    if (pi.mode == MODE_COMPRESS) {
+        switch (pi.algo) {
+            case ALGO_RLE:
+                rle_compress(cf);
+                break;
+        }
+        if (CMP_err == ERR_COMPRESSION_FAILED)
+            return err_print(CMP_err), -1;
+    } else {
+        switch (pi.algo) {
+            case ALGO_RLE:
+                rle_decompress(cf);
+                break;
+        }
+        if (CMP_err == ERR_DECOMPRESSION_FAILED)
+            return err_print(CMP_err), -1;
+    }
+#pragma GCC diagnostic pop
 
     /* Fin du programme. */
 
     /* Fermeture des flux. */
-    if (cmpf_close(&cf))
-        return err_print(ERR_IO_FCLOSE);
+    if (cmpf_close(cf))
+        return err_print(CMP_err), -1;
     /* Génération des statistiques si demandé. */
     if (pi.stat && stat_print(pi.s_input_file, pi.s_output_file))
-        err_print(ERR_STAT_PRINT);
+        err_print(ERR_STAT);
     return 0;
 }

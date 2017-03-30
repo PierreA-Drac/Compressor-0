@@ -16,12 +16,15 @@ compromis entre le temps de compression et la taille de l'objet compressé.
 
 ## Fonctionnalités à implémenter
 
-* Fonctions d'entrées/sorties génériques (en cours).
-* Fonctions de modification et lecture bit à bit.
+* Profile de profilage dans le Makefile (opti O2 et -DNDEBUG moins -flto et -s).
+* Écrire détection automatique algo lors de la décompression.
+* Nouvelle gestion des noms de fichiers par défaut.
+* Fonctions de modification bit à bit isolé dans un module.
+    * Logarithme en base 2 d'une puissance de 2 => supprimer les multiplications.
 * Implémentation d'arbre binaire.
 * Implémentation de tas binaire.
 * Implémentations de plusieurs algorithmes :
-    * Codage par répetition.
+    * Huffman, LZXX.
     * À déterminer.
 * Histogrammes : plusieurs modes différents (ex. : regrouper chacune des données
 par algo).
@@ -72,19 +75,20 @@ dans le répertoire de l'exécutable.
 
 #### Algorithmes
 
-> <b>\-\-LZMA</b> <br/>
+> <b>\-\-RLE</b> <br/>
 
-Compresse le fichier en utilisant l'algorithme LZMA. (Ici à titre d'exemple,
-algorithme non implémenté).
+Compresse le fichier en utilisant l'algorithme RLE (Run-Lenght Encoding).
+L'algorithme nécéssite obligatoirement un fichier encodé en ASCII pour
+fonctionner.
 
 ### Statut de sortie
 
-Retourne la valeur 0 si la compression s'est bien effectuée.
+Retourne 0 si la compression s'est bien effectuée, ou -1 sur une erreur.
 
 ### Exemples
 
 > $ <b>compressor-0 -c -i</b> <i>env/corpus/text.txt</i> <b>-o</b> <i>text.cmp</i>
-> <b>\-\-LZMA -s</b>
+> <b>\-\-RLE -s</b>
 
 > $ <b>compressor-0 \-\-decompress \-\-input=</b><i>"text.cmp"</i>
 > <b>\-\-output=</b><i>"text.txt"</i>
@@ -97,6 +101,11 @@ flags de débuggage, à 0, pour les désactiver et compiler en mode release.
 > $ <b>make</b> [<b>run</b>] [<b>ARGS=</b><i>ARGUMENTS</i>] <br/>
 
 Lance le programme avec les arguments de la variable ARGS.
+
+> $ <b>make test</b> [<b>FILE_NAME=</b><i>NAME</i>] [<b>FILE_DIR=</b><i>PATH</i>]
+
+Lance une série compression/décompression sur un fichier spécifié par les
+variables FILE_NAME et FILE_DIR.
 
 > $ <b>make</b> <b>benchmark</b> <br/>
 

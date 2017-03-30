@@ -14,11 +14,12 @@
 #include <sys/stat.h>
 #include <sys/resource.h>
 #include "stats.h"
+#include "errors.h"
 
 /* Variables globales privées =============================================== */
 
 /* Contiendra le temps CPU à l'initialisation du programme. */
-static clock_t t;
+static clock_t STAT_t;
 
 /* Fonctions privées ======================================================== */
 
@@ -29,7 +30,7 @@ static int stat_print_file(const char *s_pathname)
     /* Récupération des statistiques. */
     struct stat file_stat;
     if (stat(s_pathname, &file_stat))
-        return perror("stat in stat_print_file"), -1;
+        return perror("stat for file statistics"), -1;
     /*[> Récupération du nom du fichier sans le chemin. <] */
     /*const char *s_ptr_tmp = strrchr(s_pathname, '/'); */
     /*s_pathname = s_ptr_tmp ? s_ptr_tmp + 1 : s_pathname; */
@@ -43,13 +44,13 @@ static int stat_print_file(const char *s_pathname)
 static int stat_print_prog()
 {
     /* Temps CPU utilisé (mode user et kernel). */
-    t = clock() - t;
+    STAT_t = clock() - STAT_t;
     printf("Temps CPU (user & kernel) du programme : %f s.\n",
-           ((float)t) / CLOCKS_PER_SEC);
+           ((float)STAT_t) / CLOCKS_PER_SEC);
     /* Consommation en mémoire. */
     struct rusage rus;
     if (getrusage(RUSAGE_SELF, &rus))
-        return perror("getrusage in stat_print_prog"), -1;
+        return perror("getrusage for program statistics"), -1;
     printf("Espace mémoire utilisé (resident set size) : %ld kB.\n",
            rus.ru_maxrss);
     return 0;
@@ -59,14 +60,13 @@ static int stat_print_prog()
 
 void stat_init()
 {
-    t = clock();
+    STAT_t = clock();
 }
 
 int stat_print(const char *s_filepath_in, const char *s_filepath_out)
 {
-    if (stat_print_file(s_filepath_in) || stat_print_file(s_filepath_out))
-        return -1;
-    if (stat_print_prog())
-        return -1;
+    if (stat_print_file(s_filepath_in) || stat_print_file(s_filepath_out)
+        || stat_print_prog())
+        return CMP_err = ERR_STAT, -1;
     return 0;
 }
