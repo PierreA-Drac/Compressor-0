@@ -59,12 +59,13 @@ void help_print(FILE * const stream, const int exit_code)
             "\t\tsera écrit dans le répertoire \"out/\" situé dans le\n"
             "\t\trépertoire de l'exécutable.\n\n"
             "Algorithmes :\n"
-            "\t--LZMA\n"
-            "\t\tCompresse le fichier en utilisant l'algorithme LZMA.\n"
-            "\t\t(Ici à titre d'exemple, algorithme non implémenté).\n\n"
+            "\t--RLE\n"
+            "\t\tCompresse le fichier en utilisant l'algorithme RLE\n"
+            "\t\t(Run-Lenght Encoding). L'algorithme nécéssite\n"
+            "\t\tobligatoirement un fichier encodé en ASCII pour fonctionner.\n\n"
             "Exemples :\n"
-            "\tcompressor -c -i env/corpus/text.txt -o text.cmp --LZMA -s\n\n"
-            "\tcompressor --decompress --input=\"text.cmp\""
+            "\tcompressor -c -i env/corpus/text.txt -o text.cmp --RLE -s\n\n"
+            "\tcompressor --decompress --input=\"text.cmp\" "
             "--output=\"text.txt\"\n\n");
     exit(exit_code);
 }
