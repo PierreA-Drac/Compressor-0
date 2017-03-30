@@ -14,43 +14,23 @@
 
 /* Fonctions publiques ====================================================== */
 
-err_code_e err_print(const err_code_e err)
+void err_print(const err_code_e err)
 {
-    fprintf(stderr, "Erreur : ");
-    switch (err) {
-        case ERR_NONE:
-            break;
-        case ERR_BAD_ADRESS:
-            fprintf(stderr, "L'adresse spécifiée est invalide.\n");
-            break;
-        case ERR_INIT_MISSING_OPTIONS:
-            fprintf(stderr, "Une option requise est manquante pour le "
-                    "fonctionnement du programme.\n");
-            break;
-        case ERR_STAT_PRINT:
-            fprintf(stderr, "Récupération des statistiques impossible.\n");
-            break;
-        case ERR_IO_FREAD:
-            fprintf(stderr, "Lecture du fichier impossible.\n");
-            break;
-        case ERR_IO_FREAD_EOF:
-            fprintf(stderr, "Lecture du fichier impossible car la fin à été"
-                    "atteinte.\n");
-            break;
-        case ERR_IO_FWRITE:
-            fprintf(stderr, "Écriture du fichier impossible.\n");
-            break;
-        case ERR_IO_FCLOSE:
-            fprintf(stderr, "Fermeture du fichier impossible.\n");
-            break;
-        case ERR_COMPRESSION_FAILED:
-            fprintf(stderr, "Compression du fichier impossible.\n");
-            break;
-        case ERR_DECOMPRESSION_FAILED:
-            fprintf(stderr, "Décompression du fichier impossible.\n");
-            break;
-    }
-    return err;
+    static const char *err_desc[] = {
+        "aucune erreur",
+        "l'adresse spécifiée est invalide",
+        "une option requise est manquante pour le fonctionnement du programme",
+        "récupération des statistiques impossible",
+        "lecture du fichier impossible",
+        "lecture du fichier impossible car la fin à été atteinte",
+        "écriture du fichier impossible",
+        "fermeture du fichier impossible",
+        "compression du fichier impossible",
+        "décompression du fichier impossible"
+    };
+    (unsigned int)err <= ERR_DECOMPRESSION_FAILED ?
+        fprintf(stderr, "Erreur %d : %s.\n", err, err_desc[err]) :
+        fprintf(stderr, "Erreur inconnu.\n");
 }
 
 void help_print(FILE * const stream, const int exit_code)

@@ -11,19 +11,32 @@
 #ifndef __ERRORS_H
 #define __ERRORS_H
 
-/* Énumérations publiques =================================================== */
+/* Types publiques ========================================================== */
 
 typedef enum err_code err_code_e;
 
-/** Liste des codes d'erreurs du programme. Utilisé dans le retour des
+/* Variales globales ======================================================== */
+
+/**
+ * Variable mise à la disposition des fonctions pour y inscrire leur
+ * code d'erreur.
+ */
+err_code_e CMP_err;
+
+/* Énumérations publiques =================================================== */
+
+/**
+ * Liste des codes d'erreurs du programme. Utilisé dans le retour des
  * fonctions et dans la correspondance erreur <=> message. Le code 0 signifie
- * (sauf cas particulier) qu'aucune erreur ne s'est produite. */
+ * (sauf cas particulier) qu'aucune erreur ne s'est produite.
+ */
 enum err_code {
+    ERR_OTHER = -1,             /*!< Erreur quelconque. */
     ERR_NONE = 0,               /*!< Aucune erreur. */
     ERR_BAD_ADRESS,             /*!< Pointeur null ou invalide. */
     ERR_INIT_MISSING_OPTIONS,   /*!< Options nécéssaires au programme
                                    manquantes. */
-    ERR_STAT_PRINT,             /*!< Erreur pendant la récupération des
+    ERR_STAT,                   /*!< Erreur pendant la récupération des
                                    statistiques. */
     ERR_IO_FREAD,               /*!< Erreur pendant la lecture du fichier. */
     ERR_IO_FREAD_EOF,           /*!< Erreur pendant la lecture du fichier car la
@@ -38,11 +51,10 @@ enum err_code {
 
 /**
  * Affiche le message d'erreur sur la sortie d'erreur en fonction du code
- * d'erreur spécifié et renvoie ce même code d'erreur.
+ * d'erreur spécifié.
  * \param err Code d'erreur.
- * \return Code d'erreur entré.
  */
-err_code_e err_print(const err_code_e err);
+void err_print(const err_code_e err);
 
 /**
  * Affiche l'aide sur le flux spécifié et quitte le programme avec le code
