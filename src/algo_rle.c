@@ -261,52 +261,67 @@ static inline int rle_blck_get_word(cmp_file_s * cf, block_t * blck, int *pos,
 
 /* Fonctions publiques ====================================================== */
 
+/* N.B. : L'indice d'écriture commence à BLOCK_LENGHT car on écris les caractères dans
+ * le sens inverse duquel ont les à lu, pour pouvoir à la décompression
+ * détecter les bits de poids fort à 0 d'un caractère et le bit à 1 d'un
+ * code de répétition. On pouvait soit les écrires de gauche à droite, soit
+ * les écrires en big endian. Je pense que de gauche à droite doit être plus
+ * performant car on change de sens des groupes de bits et non chaueque bits
+ * un à un. */
+
 int rle_compress(cmp_file_s * cf)
 {
-    /* Test usuel. */
     if (!cf)
-        return err_print(ERR_BAD_ADRESS);
+        return CMP_err = ERR_BAD_ADRESS, -1;
+    CMP_err = ERR_NONE;
 
+    RLE_MODE_MOV = RLE_MODE_COMPRESS;   /* Déplacement pour ce mode (compression). */
     block_t blck_in = 0, blck_out = 0;  /* Blocs de données. */
     byte_t byte_1 = 0, byte_2 = 0;      /* Octets temporaires pour comparaisons. */
-    int count = 1, ind_out = BLOCK_LENGHT;      /* Compteur et indice. */
+    int count = 1, ind_in = BLOCK_LENGHT, ind_out = BLOCK_LENGHT;       /* Compteur et indice. */
 
-    /* N.B. : L'indice commence à BLOCK_LENGHT car on écris les caractères dans
-     * le sens inverse duquel ont les à lu, pour pouvoir à la décompression
-     * détecter les bits de poids fort à 0 d'un caractère et le bit à 1 d'un
-     * code de répétition. */
-
-    /* Tant que l'on n'a pas atteint la fin du fichier, on récupère les blocs. */
-    while (!(cmpf_get_block(cf, &blck_in))) {
-        byte_2 = blck_get_byte(blck_in, 0);
-        /* Parsing d'un bloc de données entrant. */
-        for (int ind_in = CHAR_BIT; ind_in < BLOCK_LENGHT; ind_in += CHAR_BIT) {
-#pragma GCC diagnostic ignored "-Wsequence-point"
-            count += (byte_1 = byte_2) == (byte_2 =
-                                           blck_get_byte(blck_in, ind_in));
-#pragma GCC diagnostic pop
-            if (count == 1) {   /* Cas sans répétition, écriture du caractère. */
-                if (rle_blck_put_word
-                    (cf, &blck_out, &ind_out, byte_1, CHAR_BIT))
-                    return ERR_COMPRESSION_FAILED;
-            } else if (byte_1 != byte_2 || count == REP_CODE_MAX) {     /* Cas avec répétition. */
-                /* Si la répétition est terminée ou qu'on dépasse la taille du
-                 * code de répétition. */
-                /* Éciture de l'ID d'un code : 1 bit à 1. */
-                PUT_BIT(count, 1, REP_CODE_LENGHT);
-                /* Écriture du code de répétition. */
-                if (rle_blck_put_word(cf, &blck_out, &ind_out, count,
-                                      REP_CODE_LENGHT + 1)) {
-                    return ERR_COMPRESSION_FAILED;
-                }
-                count = 1;      /* Réinit. */
-                /* Caractère à répeter. */
-                if (rle_blck_put_word
-                    (cf, &blck_out, &ind_out, byte_1, CHAR_BIT))
-                    return ERR_COMPRESSION_FAILED;
+    rle_blck_get_word(cf, &blck_in, &ind_in, &byte_2, CHAR_BIT);
+    /* Parsing des blocs de données entrant (récupération des blocs
+     * automatiques). */
+    while (!CMP_err) {
+        /* Switch, relecture, comptage. */
+        byte_1 = byte_2;
+        rle_blck_get_word(cf, &blck_in, &ind_in, &byte_2, CHAR_BIT);
+        count += (byte_1 == byte_2);
+        /* Cas sans répétition, écriture du caractère. */
+        if (count == 1)
+            rle_blck_put_word(cf, &blck_out, &ind_out, byte_1, CHAR_BIT);
+        /* Cas avec répétition terminée ou code de répétition plein. */
+        else if (byte_1 != byte_2 || count == REP_CODE_MAX) {
+            /* Switch pour forcer la terminaison de la répétition. */
+            if (count == REP_CODE_MAX) {
+                byte_1 = byte_2;
+                rle_blck_get_word(cf, &blck_in, &ind_in, &byte_2, CHAR_BIT);
             }
-            /* Sinon, on est dans une répétition non terminée et count s'est
-             * juste incrémenté de 1. */
+            /* Éciture de l'ID d'un code : 1 bit à 1. */
+            PUT_BIT(count, 1, REP_CODE_LENGHT);
+            /* Écriture du code de répétition. */
+            rle_blck_put_word(cf, &blck_out, &ind_out, count,
+                              REP_CODE_LENGHT + 1);
+            /* Écriture du caractère à répeter et reset du compteur. */
+            rle_blck_put_word(cf, &blck_out, &ind_out, byte_1, CHAR_BIT);
+            count = 1;
+
+        }
+        /* Sinon, on est dans une répétition non terminée et count s'est
+         * juste incrémenté de 1. */
+    }
+    /* Écriture du dernier byte du bloc s'il n'a pas été comparé (passer dans
+     * byte_1). */
+    if (byte_2)
+        rle_blck_put_word(cf, &blck_out, &ind_out, byte_2, CHAR_BIT);
+    /* Si erreur pendant la compression ou l'écriture du dernier bloc. */
+    if ((CMP_err != ERR_IO_FREAD_EOF && CMP_err)
+        || cmpf_put_block(cf, blck_out))
+        return err_print(CMP_err), CMP_err = ERR_COMPRESSION_FAILED, -1;
+    return 0;
+}
+
         }
         byte_1 = byte_2;        /* Switch avant la lecture du premier caractère. */
     }
