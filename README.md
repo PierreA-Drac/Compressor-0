@@ -16,7 +16,6 @@ compromis entre le temps de compression et la taille de l'objet compressé.
 
 ## Fonctionnalités à implémenter
 
-* Profile de profilage dans le Makefile (opti O2 et -DNDEBUG moins -flto et -s).
 * Écrire détection automatique algo lors de la décompression.
 * Nouvelle gestion des noms de fichiers par défaut.
 * Fonctions de modification bit à bit isolé dans un module.
@@ -95,14 +94,14 @@ Retourne 0 si la compression s'est bien effectuée, ou -1 sur une erreur.
 
 ## Make instructions
 
-Il est possible de switcher la variable DEBUG du Makefile, de 1, pour activer les
-flags de débuggage, à 0, pour les désactiver et compiler en mode release.
+La variable "CC_MODE" peut être positionné à "RELEASE", "PROFILER" ou
+encore à "DEBUG" en fonction du mode voulu pour la compilation.
 
 > $ <b>make</b> [<b>run</b>] [<b>ARGS=</b><i>ARGUMENTS</i>] <br/>
 
 Lance le programme avec les arguments de la variable ARGS.
 
-> $ <b>make test</b> [<b>FILE_NAME=</b><i>NAME</i>] [<b>FILE_DIR=</b><i>PATH</i>]
+> $ <b>make test</b> [<b>FILE_DIR=</b><i>PATH</i>] [<b>FILE_NAME=</b><i>NAME</i>]
 
 Lance une série compression/décompression sur un fichier spécifié par les
 variables FILE_NAME et FILE_DIR.
@@ -141,8 +140,8 @@ rapide mais moins précis) ou le profil p2 (plus lent mais plus précis).
 Lance le profilage avec callgrind, affiche les résultats bruts sur la sortie
 standard, et lance la visualisation avec kcachegrind.
 
-> $ <b> make gprof</b> [<b>ARGS=</b><i>ARGUMENTS</i>]
->
+> $ <b> make gprof </b> [<b>ARGS=</b><i>ARGUMENTS</i>]
+
 Nettoie les fichiers temporaires et relance la compilation avec les flags
 nécessaires à gprof, puis affiche le résultat du profilage sur la sortie
 standard.

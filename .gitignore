@@ -17,6 +17,10 @@ compressor-0
 out/
 gmon.out
 callgrind.out
+.RELEASE
+.PROFILER
+.DEBUG
+.GPROF
 
 # Documentation
 html/

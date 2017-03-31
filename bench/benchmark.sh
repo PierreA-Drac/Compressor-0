@@ -21,6 +21,8 @@ files_path='env/text/'
 algos=("$1")
 # Liste des fichiers à compresser.
 files=(`find "$root_path$files_path"*`)
+# Mode de compilation des fichiers.
+cc_mode='RELEASE'
 
 ## Fichiers générés ...........................................................:
 
@@ -47,12 +49,14 @@ else
         echo "Erreur : aucun fichier à compresser."
         exit -1
     else
-        echo "Compilation..."
-        make compil --directory=$root_path > /dev/null
+        printf "Compilation ... "
+        make compil --directory=$root_path CC_MODE="$cc_mode" > /dev/null
         if [ $? -ne 0 ]
         then
             echo "Erreur : compilation échouée."
             exit -1
+        else
+            echo "OK !"
         fi
         # Inscrit le nom des colonnes.
         echo "Fichier|Algorithme|Taille original (kB)|Taille compressé" \
@@ -70,8 +74,8 @@ else
                     | tr '\n' '|' >> $tmp_file
                 # Lance la compression, supprime les messages de make, isole les
                 # données importantes et les mets en forme.
-                make --directory=$root_path --no-print-directory \
-                    ARGS="-c -i \"$file\" -s --$algo"\
+                make run --directory=$root_path --no-print-directory \
+                CC_MODE="$cc_mode" ARGS="-c -i \"$file\" -s --$algo"\
                     | sed -n 3,6p \
                     | sed -e "s/.* : //g" -e "s/\([0-9.]*\).*/\1/g" \
                     | tr '\n' '|' >> $tmp_file

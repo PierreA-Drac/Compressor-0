@@ -19,26 +19,51 @@ EXEC = $(EXE_PATH)$(EXE_NAME)
 export SRC = $(shell find $(SRC_PATH)*.c)
 export INC = $(shell find $(INC_PATH)*.h)
 OBJ = $(SRC:$(SRC_PATH)%.c=$(OBJ_PATH)%.o)
-
 CALLGRIND_OUT = callgrind.out
 
 ## Compilation ................................................................:
 
-DEBUG = 1
-
+# MODE : RELEASE, PROFILER, DEBUG
 CC = gcc
+CC_MODE = DEBUG
+TAG_MODE = .$(CC_MODE)
+
 INC_FLAGS = -I$(INC_PATH)
 DEP_FLAGS = -MMD -MP
-GPROF_FLAGS = -pg
 
-CFLAGS = $(INC_FLAGS) $(DEP_FLAGS)
+RELEASE_CFLAGS 	 = -O2 -DNDEBUG -flto
+RELEASE_LDFLAGS  = -s -flto
+
+PROFILER_CLFAGS  = -O2 -g3 -DNDEBUG -fno-inline
+PROFILER_LDFLAGS =
+
+DEBUG_CFLAGS     = -Og -g3 -Wall
+DEBUG_LDFLAGS 	 =
+
+GPROF 		 =
+GPROF_CFLAGS 	 = -pg
+GPROF_LDFLAGS 	 = -pg
+
+CFLAGS  = $(INC_FLAGS) $(DEP_FLAGS)
 LDFLAGS =
-ifeq ($(DEBUG), 1)
-    CFLAGS += -g3 -Wall -Og
-    LDFLAGS +=
+
+ifeq '$(CC_MODE)' "RELEASE"
+    CFLAGS  += $(RELEASE_CFLAGS)
+    LDFLAGS += $(RELEASE_LDFLAGS)
+else ifeq '$(CC_MODE)' "PROFILER"
+    CFLAGS  += $(PROFILER_CLFAGS)
+    LDFLAGS += $(PROFILER_LDFLAGS)
+    ifdef GPROF
+	TAG_MODE = .GPROF
+	CFLAGS  += $(GPROF_CFLAGS)
+	LDFLAGS += $(GPROF_LDFLAGS)
+    endif
+else ifeq '$(CC_MODE)' "DEBUG"
+    CFLAGS  += $(DEBUG_CFLAGS)
+    LDFLAGS += $(DEBUG_LDFLAGS)
 else
-    CFLAGS += -flto -DNDEBUG -O2
-    LDFLAGS += -flto -s
+    $(error Le mode spécifié est invalide. Modes disponibles : RELEASE, \
+	PROFILER, DEBUG)
 endif
 
 ## Lancement ..................................................................:
@@ -81,20 +106,32 @@ test : compil
 
 ## Benchmark ..................................................................:
 
-benchmark :
-	make --directory="$(BENCH_PATH)" --no-print-directory
+benchmark : MODE_RELEASE
+	@make --directory="$(BENCH_PATH)" --no-print-directory
 
 ## Compilation ................................................................:
 
-compil : $(EXEC)
+compil : pre-compil $(EXEC)
 
 $(EXEC) : $(OBJ) 
 	@echo "--> Édition des liens dans '$(EXEC)' :"
 	$(CC) $^ -o $(EXEC) $(LDFLAGS)
+	@echo "--> Compilation en mode '$(CC_MODE)' effectuée."
 
 $(OBJ_PATH)%.o : $(SRC_PATH)%.c
 	@echo "--> Compilation de '$<' :"
 	$(CC) -c $< -o $@ $(CFLAGS)
+
+## Compilation modale .........................................................:
+
+pre-compil :
+	@if [ ! -e $(TAG_MODE) ]; then \
+	    make clean --no-print-directory; \
+	    touch $(TAG_MODE); \
+	fi
+
+MODE_% :
+	@make compil 'CC_MODE=$(@:MODE_%=%)' --no-print-directory
 
 ## Dépendances ................................................................:
 
@@ -105,49 +142,46 @@ $(OBJ_PATH)%.o : $(SRC_PATH)%.c
 clean :
 	@echo "--> Suppression des fichier temporaires de $(PROJECT) :"
 	rm -f $(OBJ_PATH)*.o $(OBJ_PATH)*.d $(SRC_PATH)*~ $(INC_PATH)*~ \
-	    gmon.out $(CALLGRIND_OUT)
+	    gmon.out $(CALLGRIND_OUT) .RELEASE .PROFILER .DEBUG .GPROF
 	find . -name .fuse_hidden* -exec rm -f '{}' \;
 
 mrproper : clean
 	@echo "--> Suppression de l'exécutable et des fichiers produits" \
 	    "de $(PROJECT) :"
 	rm -f $(EXEC) $(OUT_PATH)*
-	make clean --directory="$(BENCH_PATH)" --no-print-directory
-	make clean --directory="$(DOC_PATH)" --no-print-directory
+	@make clean --directory="$(BENCH_PATH)" --no-print-directory
+	@make clean --directory="$(DOC_PATH)" --no-print-directory
 	@echo "--> Nettoyage complet du dossier de travail de $(PROJECT)" \
 	    "effectué !"
 
 ## Debugger & Profiler ........................................................:
 
-gdb : compil
+gdb : MODE_DEBUG
 	@echo "--> Debbugage avec $@ :"
 	$@ --args $(EXEC) $(ARGS)
 
-valgrind-p1 : compil
+valgrind-p1 : MODE_DEBUG
 	@echo "--> Debbugage avec $@ (profile 1) :"
 	valgrind --tool=memcheck --leak-resolution=high \
 	    --show-possibly-lost=yes --show-reachable=yes $(EXEC) $(ARGS)
 
-valgrind-p2 : compil
+valgrind-p2 : MODE_DEBUG
 	@echo "--> Debbugage avec $@ (profile 2) :"
 	valgrind --tool=memcheck --leak-resolution=high --leak-check=full \
 	    --show-possibly-lost=yes --show-reachable=yes --track-origins=yes \
 	    $(EXEC) $(ARGS)
 
-kcachegrind : compil
+kcachegrind : MODE_PROFILER
 	@echo "--> Profilage avec callgrind :"
 	valgrind --tool=callgrind --cache-sim=yes --branch-sim=yes \
 	    --callgrind-out-file="$(CALLGRIND_OUT)" $(EXEC) $(ARGS)
 	@echo "--> Visionnage du profilage avec callgrind :"
 	callgrind_annotate --auto=yes $(CALLGRIND_OUT)
 	@echo "--> Visionnage du profilage avec $@ :"
-	$@ $(CALLGRIND_OUT)
+	$@ $(CALLGRIND_OUT) &
 
 gprof :
-	make clean --no-print-directory
-	@echo "--> Compilation avec les flags nécéssaires à $@ :"
-	make run --no-print-directory CFLAGS="$(CFLAGS) $(GPROF_FLAGS)" \
-	    LDFLAGS="$(LDFLAGS) $(GPROF_FLAGS)"
+	@make run --no-print-directory 'CC_MODE=PROFILER' 'GPROF=1'
 	@echo "--> Visionnage des résultats du profilage :"
 	$@ $(EXEC)
 
@@ -161,24 +195,24 @@ indent :
 ## Documentation ..............................................................:
 
 doc :
-	make --directory="$(DOC_PATH)" --no-print-directory MASTER=1
+	@make --directory="$(DOC_PATH)" --no-print-directory MASTER=1
 
 man :
 	@echo "--> Affichage du manuel de $(PROJECT) :"
-	@# man $(MAN_PATH)$(EXE_NAME).1
+	@# $@ $(MAN_PATH)$(EXE_NAME).1
 	groff -k -Tutf8 -man $(MAN_PATH)$(EXE_NAME).1 | less
 
 ## Aide .......................................................................:
 
 help :
 	@echo "Affichage de l'aide de $(PROJECT) :\n"
-	@echo "Il est possible de switcher la variable DEBUG du Makefile, de 1,"
-	@echo "pour activer les flags de débuggage, à 0, pour les désactiver et"
-	@echo "compiler en mode release.\n"
+	@echo "La variable \"CC_MODE\" peut être positionné à \"RELEASE\","
+	@echo "\"PROFILER\" ou encore à \"DEBUG\" en fonction du mode voulu"
+	@echo "pour la compilation.\n"
 	@echo "Cibles :"
 	@echo "\tmake [run] [ARGS=ARGUMENTS]"
 	@echo "\t\tLance le programme avec les arguments de la variable ARGS."
-	@echo "\n\tmake test [FILE_NAME=NAME] [FILE_DIR=PATH]"
+	@echo "\n\tmake test [FILE_DIR=PATH] [FILE_NAME=NAME]"
 	@echo "\t\tLance une série compression/décompression sur un fichier"
 	@echo "\t\tspécifié par les variables FILE_NAME et FILE_DIR."
 	@echo "\n\tmake benchmark"
