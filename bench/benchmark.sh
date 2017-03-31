@@ -14,15 +14,18 @@
 root_path='../'
 # Dossier contenant les fichiers à chercher.
 files_path='env/text/'
+# Mode de compilation du programme.
+cc_mode='RELEASE'
 
 ## Algorithmes et fichiers ....................................................:
 
 # Liste des algorithmes disponibles.
 algos=("$1")
+# Regex des fichiers à compresser.
+files_regex='*.txt'
 # Liste des fichiers à compresser.
-files=(`find "$root_path$files_path"*`)
-# Mode de compilation des fichiers.
-cc_mode='RELEASE'
+files=(`find "$root_path$files_path" -name "$files_regex"`)
+
 
 ## Fichiers générés ...........................................................:
 

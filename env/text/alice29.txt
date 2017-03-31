@@ -1,0 +1,1 @@
+../Canterbury Corpus/alice29.txt
