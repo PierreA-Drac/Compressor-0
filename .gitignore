@@ -1,0 +1,27 @@
+# Fichier de configuration
+tags
+.gdbinit
+.ycm_extra_conf.py
+
+# Fichiers binaires
+compressor-0
+*.o
+.fuse*
+
+# Fichiers temporaires ou de sauvegardes
+*.d
+*.swp
+*~
+*.log
+*.svg
+out/
+gmon.out
+callgrind.out
+.RELEASE
+.PROFILER
+.DEBUG
+.GPROF
+
+# Documentation
+html/
+latex/
