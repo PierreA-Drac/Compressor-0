@@ -7,18 +7,19 @@ actuellement en *cours de développement*.
 
 ## Objectifs
 
-Le but de ce projet est de développer un logiciel en ligne commande qui permet
-de compresser et de décompresser des fichiers. Les fichiers peuvent être de type
-différents, mais nous traiterons dans un premier temps les fichiers textes. Ce
-programme doit permettre l'utilisation de plusieurs algorithmes différents avec
-différentes implémentations variées, l'objectif étant de trouver le meilleur
-compromis entre le temps de compression et la taille de l'objet compressé.
+Le but de ce projet est de développer un logiciel en ligne de commande qui
+permet de compresser et de décompresser des fichiers. Les fichiers peuvent être
+de type différents, mais nous traiterons dans un premier temps les fichiers
+textes. Ce programme doit permettre l'utilisation de plusieurs algorithmes
+différents avec différentes implémentations variées, l'objectif étant de trouver
+le meilleur compromis entre le temps de compression et la taille de l'objet
+compressé.
 
 ## Fonctionnalités à implémenter
 
-* Écrire détection automatique algo lors de la décompression.
-* Nouvelle gestion des noms de fichiers par défaut.
-* Fonctions de modification bit à bit isolé dans un module.
+* Détection automatique de l'algorithme lors de la décompression.
+* Nouvelle gestion des noms de fichiers par défaut en fonction du mode (.cmp).
+* Fonctions de modification bit à bit isolés dans un module :
     * Logarithme en base 2 d'une puissance de 2 => supprimer les multiplications.
 * Implémentation d'arbre binaire.
 * Implémentation de tas binaire.
@@ -26,7 +27,8 @@ compromis entre le temps de compression et la taille de l'objet compressé.
     * Huffman, LZXX.
     * À déterminer.
 * Histogrammes : plusieurs modes différents (ex. : regrouper chacune des données
-par algo).
+par algo plutôt que par fichier).
+* Archivage de plusieurs fichiers, compression parallèle sur plusieurs threads.
 
 ## Description
 
@@ -41,7 +43,6 @@ flag. Pour la décompression, il n'est pas nécessaire de préciser l'algorithme
 
 > $ <b>compressor-0 -c</b>|<b>-d -i</b> <i>INPUT FILE</i> 
 > [<b>-o</b> <i>OUTPUT FILE</i>] [<i>ALGORITHM FLAG</i>] [<b>-s</b>] [<b>-h</b>]
-
 
 ### Options
 
