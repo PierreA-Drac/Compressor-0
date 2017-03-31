@@ -1,0 +1,1 @@
+../Canterbury Corpus/plrabn12.txt
