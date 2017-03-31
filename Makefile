@@ -100,6 +100,7 @@ test : compil
 	@head $(FILE_DCMP)
 	@tail $(FILE_DCMP)
 	@echo "--> Statistiques des fichiers :"
+	@sha1sum $(FILE_ORIG) $(FILE_DCMP)
 	@wc $(FILE_ORIG)
 	@wc $(FILE_CMPR)
 	@wc $(FILE_DCMP)
